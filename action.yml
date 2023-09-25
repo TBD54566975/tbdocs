@@ -1,0 +1,23 @@
+name: 'tbdocs'
+description: 'Provide a description here'
+author: 'TBD54566975'
+
+# Define your inputs here.
+inputs:
+  milliseconds:
+    description: 'Your input description here'
+    required: true
+    default: '1000'
+  docs_report:
+    description: 'What is the docs report tool?'
+    required: true
+    default: 'api-reporter'
+
+# Define your outputs here.
+outputs:
+  time:
+    description: 'Your output description here'
+
+runs:
+  using: node20
+  main: dist/index.js
