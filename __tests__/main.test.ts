@@ -44,10 +44,14 @@ describe('action', () => {
     expect(debugMock).toHaveBeenNthCalledWith(1, 'Waiting 500 milliseconds ...')
     expect(debugMock).toHaveBeenNthCalledWith(
       2,
-      expect.stringMatching(timeRegex)
+      expect.stringContaining('docs report')
     )
     expect(debugMock).toHaveBeenNthCalledWith(
       3,
+      expect.stringMatching(timeRegex)
+    )
+    expect(debugMock).toHaveBeenNthCalledWith(
+      4,
       expect.stringMatching(timeRegex)
     )
     expect(setOutputMock).toHaveBeenNthCalledWith(
