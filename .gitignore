@@ -105,3 +105,4 @@ __tests__/runner/*
 dist/tsdoc-metadata.json
 temp
 reporter
+dist
