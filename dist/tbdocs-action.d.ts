@@ -7,12 +7,7 @@ export declare interface DocsReport {
 
 export declare type DocsReporterType = 'api-extractor';
 
-export declare const generateReport: (docsReport: DocsReporterType, apiConfig: string) => Promise<{
-    reporter: "api-extractor";
-    errorsCount: number;
-    warningsCount: number;
-    messages: ReportMessage[];
-}>;
+export declare const generateReport: (docsReport: DocsReporterType, apiConfig: string) => Promise<DocsReport>;
 
 export declare type MessageCategory = 'compiler' | 'docs' | 'extractor' | 'unknown';
 

@@ -6,7 +6,7 @@
  * variables following the pattern `INPUT_<INPUT_NAME>`.
  */
 
-// import * as core from '@actions/core'
+import * as core from '@actions/core'
 import * as run from '../src/run'
 
 // Mock the GitHub Actions core library
@@ -14,6 +14,9 @@ import * as run from '../src/run'
 // const getInputMock = jest.spyOn(core, 'getInput')
 // const setFailedMock = jest.spyOn(core, 'setFailed')
 // const setOutputMock = jest.spyOn(core, 'setOutput')
+const warningMock = jest.spyOn(core, 'warning')
+const errorMock = jest.spyOn(core, 'error')
+const noticeMock = jest.spyOn(core, 'notice')
 
 // Mock the action's main function
 const runMock = jest.spyOn(run, 'run')
@@ -39,6 +42,9 @@ describe('action', () => {
 
     await run.run()
     expect(runMock).toHaveReturned()
+    expect(warningMock).toHaveBeenCalledTimes(14)
+    expect(errorMock).toHaveBeenCalledTimes(0)
+    expect(noticeMock).toHaveBeenCalledTimes(0)
 
     // // Verify that all of the core library functions were called correctly
     // expect(debugMock).toHaveBeenNthCalledWith(1, 'Waiting 500 milliseconds ...')
