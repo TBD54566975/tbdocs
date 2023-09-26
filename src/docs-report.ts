@@ -85,6 +85,8 @@ const initializeExtractorConfig = (apiConfig?: string): ExtractorConfig => {
     console.info('>>> Loading api-extractor.json custom file:', apiConfig)
     return ExtractorConfig.loadFileAndPrepare(apiConfig)
   } else {
+    console.info('>>> Automatically resolving api-extractor configs...')
+
     const config = ExtractorConfig.loadFile('api-extractor.json')
     const packageJsonFullPath = lookupFile('package.json')
     const projectFolder = path.dirname(packageJsonFullPath)
@@ -115,9 +117,7 @@ const getPackageRequiredFields = (
   typings: string
   main: string
 } => {
-  const packageJsonFile = readFileSync(
-    path.join(packageJsonFullPath, 'package.json')
-  )
+  const packageJsonFile = readFileSync(packageJsonFullPath)
   const packageJson = JSON.parse(packageJsonFile.toString())
 
   // validate typings & main
@@ -226,7 +226,7 @@ function checkTsconfigProps(projectPath: string): void {
 }
 
 const lookupFile = (fileName: string, dir?: string): string => {
-  const currentDirectory = dir || process.cwd()
+  const currentDirectory = dir ?? process.cwd()
 
   const packageJsonPath = path.join(currentDirectory, fileName)
   if (existsSync(packageJsonPath)) {
