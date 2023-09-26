@@ -34,10 +34,13 @@ export async function run(): Promise<void> {
   }
 }
 
-const processReport = async (report: DocsReport, failOnError: boolean) => {
+const processReport = async (
+  report: DocsReport,
+  failOnError: boolean
+): Promise<void> => {
   console.info(`Report: ${JSON.stringify(report)}`)
 
-  await annotateCode(report.messages)
+  annotateCode(report.messages)
 
   // TODO: create a summary of the report in a Github comment
 
@@ -53,7 +56,12 @@ const processReport = async (report: DocsReport, failOnError: boolean) => {
   }
 }
 
-const annotateCode = async (messages: ReportMessage[]) => {
+type AnnotationFunction = (
+  message: string | Error,
+  properties?: core.AnnotationProperties
+) => void
+
+const annotateCode = (messages: ReportMessage[]): void => {
   for (const message of messages) {
     const annotateFn = getAnnotationFn(message.level)
 
@@ -66,7 +74,7 @@ const annotateCode = async (messages: ReportMessage[]) => {
   }
 }
 
-const getAnnotationFn = (level: string) => {
+const getAnnotationFn = (level: string): AnnotationFunction => {
   switch (level) {
     case 'error':
       return core.error

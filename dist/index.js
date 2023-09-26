@@ -2924,7 +2924,7 @@ async function run() {
 exports.run = run;
 const processReport = async (report, failOnError) => {
     console.info(`Report: ${JSON.stringify(report)}`);
-    await annotateCode(report.messages);
+    annotateCode(report.messages);
     // TODO: create a summary of the report in a Github comment
     if (report.errorsCount > 0) {
         const errorMessage = `Docs report ${report.reporter} failed with ${report.errorsCount} errors.`;
@@ -2938,7 +2938,7 @@ const processReport = async (report, failOnError) => {
         core.warning(warningMessage);
     }
 };
-const annotateCode = async (messages) => {
+const annotateCode = (messages) => {
     for (const message of messages) {
         const annotateFn = getAnnotationFn(message.level);
         annotateFn(message.text, {

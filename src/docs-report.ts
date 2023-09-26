@@ -1,4 +1,3 @@
-import * as path from 'path'
 import {
   Extractor,
   ExtractorConfig,
@@ -34,7 +33,7 @@ export interface ReportMessage {
 export const generateReport = async (
   docsReport: DocsReporterType,
   apiConfig: string
-) => {
+): Promise<DocsReport> => {
   switch (docsReport) {
     case 'api-extractor':
       return generateApiExtractorReport(apiConfig)
@@ -43,7 +42,9 @@ export const generateReport = async (
   }
 }
 
-const generateApiExtractorReport = async (apiConfig: string) => {
+const generateApiExtractorReport = async (
+  apiConfig: string
+): Promise<DocsReport> => {
   const extractorConfig = initializeExtractorConfig(apiConfig)
 
   const report = {
@@ -78,7 +79,7 @@ const generateApiExtractorReport = async (apiConfig: string) => {
   return report
 }
 
-const initializeExtractorConfig = (apiConfig: string) => {
+const initializeExtractorConfig = (apiConfig: string): ExtractorConfig => {
   // check for the package json for these attributes
   // "typings": "./dist/index.d.ts",
   // "main": "./dist/index.js",
