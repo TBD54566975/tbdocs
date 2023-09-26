@@ -1,3 +1,3 @@
-const action = require('./index.js')
+const lib = require('./index.js')
 
-action.run();
+lib.run();

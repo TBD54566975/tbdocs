@@ -104,3 +104,5 @@ __tests__/runner/*
 
 dist/*.d.ts
 dist/*.d.ts.map
+dist/tsdoc-metadata.json
+temp

@@ -27,7 +27,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.issue = exports.issueCommand = void 0;
-const os = __importStar(__nccwpck_require__(37));
+const os = __importStar(__nccwpck_require__(563));
 const utils_1 = __nccwpck_require__(278);
 /**
  * Commands
@@ -138,7 +138,7 @@ exports.getIDToken = exports.getState = exports.saveState = exports.group = expo
 const command_1 = __nccwpck_require__(351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(278);
-const os = __importStar(__nccwpck_require__(37));
+const os = __importStar(__nccwpck_require__(563));
 const path = __importStar(__nccwpck_require__(17));
 const oidc_utils_1 = __nccwpck_require__(41);
 /**
@@ -473,7 +473,7 @@ exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__nccwpck_require__(147));
-const os = __importStar(__nccwpck_require__(37));
+const os = __importStar(__nccwpck_require__(563));
 const uuid_1 = __nccwpck_require__(840);
 const utils_1 = __nccwpck_require__(278);
 function issueFileCommand(command, message) {
@@ -673,7 +673,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.summary = exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = void 0;
-const os_1 = __nccwpck_require__(37);
+const os_1 = __nccwpck_require__(563);
 const fs_1 = __nccwpck_require__(147);
 const { access, appendFile, writeFile } = fs_1.promises;
 exports.SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY';
@@ -2722,6 +2722,125 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ 37:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.wait = exports.generateReport = void 0;
+const api_extractor_1 = __nccwpck_require__(555);
+const generateReport = async (docsReport, apiConfig) => {
+    switch (docsReport) {
+        case 'api-extractor':
+            return generateApiExtractorReport(apiConfig);
+        default:
+            throw new Error(`Unknown docs report: ${docsReport}`);
+    }
+};
+exports.generateReport = generateReport;
+const generateApiExtractorReport = async (apiConfig) => {
+    const extractorConfig = initializeExtractorConfig(apiConfig);
+    const report = {
+        reporter: 'api-extractor',
+        errorsCount: 0,
+        warningsCount: 0,
+        messages: []
+    };
+    // Invoke API Extractor
+    const extractorResult = api_extractor_1.Extractor.invoke(extractorConfig, {
+        localBuild: false,
+        // showVerboseMessages: true,
+        // showDiagnostics: true,
+        messageCallback: message => processApiExtractorMessage(report, message)
+    });
+    if (extractorResult.errorCount !== report.errorsCount) {
+        console.warn(`API Extractor completed with ${extractorResult.errorCount} errors but report only caught ${report.errorsCount}`);
+    }
+    if (extractorResult.warningCount !== report.warningsCount) {
+        console.warn(`API Extractor completed with ${extractorResult.warningCount} warnings but report only caught ${report.warningsCount}`);
+    }
+    // TODO: generate api.json artifact in the build?
+    return report;
+};
+const initializeExtractorConfig = (apiConfig) => {
+    // check for the package json for these attributes
+    // "typings": "./dist/index.d.ts",
+    // "main": "./dist/index.js",
+    // check for tsconfig
+    // "declaration": true,
+    // "sourceMap": true,
+    // "declarationMap": true,
+    // TODO: make this configurable
+    const apiExtractorJsonPath = apiConfig;
+    // Load and parse the api-extractor.json file
+    const extractorConfig = api_extractor_1.ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath);
+    //   console.info({ extractorConfig })
+    return extractorConfig;
+};
+const processApiExtractorMessage = (report, message) => {
+    if (message.category === "console" /* ExtractorMessageCategory.Console */) {
+        return;
+    }
+    const reportMessage = {
+        level: message.logLevel,
+        category: getCategoryFromApiExtractor(message.category),
+        messageId: message.messageId,
+        text: message.text,
+        sourceFilePath: message.sourceFilePath,
+        sourceFileLine: message.sourceFileLine,
+        sourceFileColumn: message.sourceFileColumn,
+        context: message.properties.exportName
+    };
+    report.messages.push(reportMessage);
+    if (reportMessage.category !== 'unknown') {
+        message.handled = true;
+    }
+    else {
+        console.warn(`Unknown API Extractor message: ${message.text}`);
+    }
+    switch (message.logLevel) {
+        case 'error':
+            report.errorsCount++;
+            break;
+        case 'warning':
+            report.warningsCount++;
+            break;
+    }
+};
+const getCategoryFromApiExtractor = (category) => {
+    switch (category) {
+        case "Compiler" /* ExtractorMessageCategory.Compiler */:
+            return 'compiler';
+        case "TSDoc" /* ExtractorMessageCategory.TSDoc */:
+            return 'docs';
+        case "Extractor" /* ExtractorMessageCategory.Extractor */:
+            return 'extractor';
+        default:
+            return 'unknown';
+    }
+};
+/**
+ * Wait for a number of milliseconds.
+ *
+ * TODO: remove this function
+ *
+ * @param milliseconds The number of milliseconds to wait.
+ * @returns {Promise<string>} Resolves with 'done!' after the wait is over.
+ */
+async function wait(milliseconds) {
+    return new Promise(resolve => {
+        if (isNaN(milliseconds)) {
+            throw new Error('milliseconds not a number');
+        }
+        setTimeout(() => resolve('done!'), milliseconds);
+    });
+}
+exports.wait = wait;
+
+
+/***/ }),
+
 /***/ 144:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -2742,8 +2861,8 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(37), exports);
 __exportStar(__nccwpck_require__(764), exports);
-__exportStar(__nccwpck_require__(259), exports);
 
 
 /***/ }),
@@ -2779,24 +2898,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(259);
+const docs_report_1 = __nccwpck_require__(37);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
     try {
-        const docsReport = core.getInput('docs_report');
-        const ms = core.getInput('milliseconds');
+        const docsReport = core.getInput('docs_report') || 'api-extractor';
+        const failOnError = core.getInput('fail_on_error') === 'true';
+        const apiConfig = core.getInput('api_config') || './api-extractor.json';
         // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-        core.debug(`Waiting ${ms} milliseconds ...`);
-        core.debug(`docs report ${docsReport} ...`);
-        // Log the current timestamp, wait, then log the new timestamp
-        core.debug(new Date().toTimeString());
-        await (0, wait_1.wait)(parseInt(ms, 10));
-        core.debug(new Date().toTimeString());
+        core.debug(`Executing docs report ${docsReport} ...`);
+        const report = await (0, docs_report_1.generateReport)(docsReport, apiConfig);
+        await processReport(report, failOnError);
         // Set outputs for other workflow steps to use
-        core.setOutput('time', new Date().toTimeString());
+        core.setOutput('report', JSON.stringify(report));
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -2805,41 +2922,52 @@ async function run() {
     }
 }
 exports.run = run;
-const setupTypescriptExtractor = () => {
-    // check for the package json for these attributes
-    // "typings": "./dist/index.d.ts",
-    // "main": "./dist/index.js",
-    // check for tsconfig
-    // "declaration": true,
-    // "sourceMap": true,
-    // "declarationMap": true,
+const processReport = async (report, failOnError) => {
+    console.info(`Report: ${JSON.stringify(report)}`);
+    await annotateCode(report.messages);
+    // TODO: create a summary of the report in a Github comment
+    if (report.errorsCount > 0) {
+        const errorMessage = `Docs report ${report.reporter} failed with ${report.errorsCount} errors.`;
+        core.error(errorMessage);
+        if (failOnError) {
+            core.setFailed(errorMessage);
+        }
+    }
+    else if (report.warningsCount > 0) {
+        const warningMessage = `Docs report ${report.reporter} completed with ${report.warningsCount} warnings.`;
+        core.warning(warningMessage);
+    }
+};
+const annotateCode = async (messages) => {
+    for (const message of messages) {
+        const annotateFn = getAnnotationFn(message.level);
+        annotateFn(message.text, {
+            title: `${message.category}: ${message.messageId}`,
+            file: message.sourceFilePath,
+            startLine: message.sourceFileLine,
+            startColumn: message.sourceFileColumn
+        });
+    }
+};
+const getAnnotationFn = (level) => {
+    switch (level) {
+        case 'error':
+            return core.error;
+        case 'warning':
+            return core.warning;
+        default:
+            return core.notice;
+    }
 };
 
 
 /***/ }),
 
-/***/ 259:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 555:
+/***/ ((module) => {
 
 "use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-/**
- * Wait for a number of milliseconds.
- * @param milliseconds The number of milliseconds to wait.
- * @returns {Promise<string>} Resolves with 'done!' after the wait is over.
- */
-async function wait(milliseconds) {
-    return new Promise(resolve => {
-        if (isNaN(milliseconds)) {
-            throw new Error('milliseconds not a number');
-        }
-        setTimeout(() => resolve('done!'), milliseconds);
-    });
-}
-exports.wait = wait;
-
+module.exports = require("@microsoft/api-extractor");
 
 /***/ }),
 
@@ -2899,7 +3027,7 @@ module.exports = require("net");
 
 /***/ }),
 
-/***/ 37:
+/***/ 563:
 /***/ ((module) => {
 
 "use strict";

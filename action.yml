@@ -4,20 +4,23 @@ author: 'TBD54566975'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
-    required: true
-    default: '1000'
   docs_report:
     description: 'What is the docs report tool?'
     required: true
-    default: 'api-reporter'
+    default: 'api-extractor'
+  fail_on_error:
+    description: 'Should it fail on error?'
+    required: false
+    default: 'false'
 
 # Define your outputs here.
 outputs:
-  time:
-    description: 'Your output description here'
+  report:
+    description: 'Generated docs report JSON object'
 
 runs:
-  using: node20
-  main: dist/main.js
+  using: "composite"
+  steps:
+  - run: npm install -g @microsoft/api-extractor
+  - run: node dist/main.js
+
