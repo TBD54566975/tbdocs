@@ -102,7 +102,5 @@ __tests__/runner/*
 .vscode
 *.code-workspace
 
-dist/*.d.ts
-dist/*.d.ts.map
 dist/tsdoc-metadata.json
 temp

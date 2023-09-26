@@ -2,7 +2,6 @@ name: 'tbdocs'
 description: 'Provide a description here'
 author: 'TBD54566975'
 
-# Define your inputs here.
 inputs:
   docs_report:
     description: 'What is the docs report tool?'
@@ -13,7 +12,6 @@ inputs:
     required: false
     default: 'false'
 
-# Define your outputs here.
 outputs:
   report:
     description: 'Generated docs report JSON object'
@@ -25,7 +23,12 @@ runs:
       with:
         node-version: 20
         cache: 'npm'
-    - run: npm install -g @microsoft/api-extractor
+
+    - name: Install API Extractor
       shell: bash
-    - run: node dist/main.js
+      run: npm install -g @microsoft/api-extractor
+      
+    - name: Run Docs Report
       shell: bash
+      run: node dist/main.js
+      
