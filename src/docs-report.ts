@@ -5,6 +5,8 @@ import {
   ExtractorMessageCategory,
   ExtractorResult
 } from '@microsoft/api-extractor'
+import { readFileSync, existsSync } from 'fs'
+import path from 'path'
 
 // @beta
 export type DocsReporterType = 'api-extractor'
@@ -33,7 +35,7 @@ export interface ReportMessage {
 
 export const generateReport = async (
   docsReport: DocsReporterType,
-  apiConfig: string
+  apiConfig?: string
 ): Promise<DocsReport> => {
   switch (docsReport) {
     case 'api-extractor':
@@ -44,7 +46,7 @@ export const generateReport = async (
 }
 
 const generateApiExtractorReport = async (
-  apiConfig: string
+  apiConfig?: string
 ): Promise<DocsReport> => {
   const extractorConfig = initializeExtractorConfig(apiConfig)
 
@@ -75,31 +77,70 @@ const generateApiExtractorReport = async (
     )
   }
 
-  // TODO: generate api.json artifact in the build?
-
   return report
 }
 
-const initializeExtractorConfig = (apiConfig: string): ExtractorConfig => {
-  // check for the package json for these attributes
-  // "typings": "./dist/index.d.ts",
-  // "main": "./dist/index.js",
+const initializeExtractorConfig = (apiConfig?: string): ExtractorConfig => {
+  if (apiConfig) {
+    console.info('>>> Loading api-extractor.json custom file:', apiConfig)
+    return ExtractorConfig.loadFileAndPrepare(apiConfig)
+  } else {
+    const config = ExtractorConfig.loadFile('api-extractor.json')
+    const packageJsonFullPath = lookupFile('package.json')
+    const projectFolder = path.dirname(packageJsonFullPath)
 
-  // check for tsconfig
-  // "declaration": true,
-  // "sourceMap": true,
-  // "declarationMap": true,
+    checkTsconfigProps(projectFolder)
 
-  // TODO: make this configurable
-  const apiExtractorJsonPath: string = apiConfig
+    const { typings } = getPackageRequiredFields(packageJsonFullPath)
+    config.projectFolder = projectFolder
+    config.mainEntryPointFilePath = typings
 
-  // Load and parse the api-extractor.json file
-  const extractorConfig: ExtractorConfig =
-    ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath)
+    console.info('>>> Api extractor config:', {
+      typings,
+      projectFolder,
+      packageJsonFullPath
+    })
 
-  //   console.info({ extractorConfig })
-  return extractorConfig
+    return ExtractorConfig.prepare({
+      configObject: config,
+      configObjectFullPath: undefined,
+      packageJsonFullPath
+    })
+  }
 }
+
+const getPackageRequiredFields = (
+  packageJsonFullPath: string
+): {
+  typings: string
+  main: string
+} => {
+  const packageJsonFile = readFileSync(
+    path.join(packageJsonFullPath, 'package.json')
+  )
+  const packageJson = JSON.parse(packageJsonFile.toString())
+
+  // validate typings & main
+  let typings = packageJson.typings || packageJson.types
+
+  if (!typings) {
+    typings = '<projectFolder>/dist/index.d.ts'
+    console.warn(
+      `No typings/types property declared in package.json... falling back to ${typings}`
+    )
+  }
+
+  let main = packageJson.main
+  if (!main) {
+    main = '<projectFolder>/dist/index.js'
+    console.warn(
+      `No main property found in package.json... falling back to ${main}`
+    )
+  }
+
+  return { typings, main }
+}
+
 const processApiExtractorMessage = (
   report: DocsReport,
   message: ExtractorMessage
@@ -168,4 +209,37 @@ export async function wait(milliseconds: number): Promise<string> {
 
     setTimeout(() => resolve('done!'), milliseconds)
   })
+}
+
+function checkTsconfigProps(projectPath: string): void {
+  const tsConfigFilePath = lookupFile('tsconfig.json', projectPath)
+  const tsConfig = JSON.parse(readFileSync(tsConfigFilePath).toString())
+  if (
+    !tsConfig.compilerOptions ||
+    !tsConfig.compilerOptions.declaration ||
+    !tsConfig.compilerOptions.declarationMap
+  ) {
+    throw new Error(
+      'tsconfig.json must have declaration and declarationMap set to true'
+    )
+  }
+}
+
+const lookupFile = (fileName: string, dir?: string): string => {
+  const currentDirectory = dir || process.cwd()
+
+  const packageJsonPath = path.join(currentDirectory, fileName)
+  if (existsSync(packageJsonPath)) {
+    return packageJsonPath
+  } else {
+    // lookup in the parent folder
+    const parentDirectory = path.join(currentDirectory, '..')
+
+    // check for not being in the root folder twice
+    if (parentDirectory !== currentDirectory) {
+      return lookupFile(parentDirectory)
+    } else {
+      throw new Error(`Could not find ${fileName}`)
+    }
+  }
 }

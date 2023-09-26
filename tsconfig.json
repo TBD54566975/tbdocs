@@ -5,6 +5,7 @@
     "module": "NodeNext",
     "rootDir": "./src",
     "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
     "baseUrl": "./",
     "sourceMap": true,
     "declaration": true,

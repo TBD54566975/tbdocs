@@ -11,6 +11,10 @@ inputs:
     description: 'Should it fail on error?'
     required: false
     default: 'false'
+  api_extractor_json_path:
+    description: 'Path to the api-extractor.json file'
+    required: false
+    default: ''
 
 outputs:
   report:

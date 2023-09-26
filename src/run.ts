@@ -14,8 +14,7 @@ export async function run(): Promise<void> {
   try {
     const docsReport: string = core.getInput('docs_report') || 'api-extractor'
     const failOnError: boolean = core.getInput('fail_on_error') === 'true'
-    const apiConfig: string =
-      core.getInput('api_config') || './api-extractor.json'
+    const apiConfig: string = core.getInput('api_extractor_json_path') || ''
 
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
     core.debug(`Executing docs report ${docsReport} ...`)
