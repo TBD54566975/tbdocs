@@ -19,8 +19,9 @@ outputs:
     description: 'Generated docs report JSON object'
 
 runs:
-  using: "composite"
-  steps:
+  - uses: actions/setup-node@v3
+    with:
+      node-version: 20
+      cache: 'npm'
   - run: npm install -g @microsoft/api-extractor
   - run: node dist/main.js
-
