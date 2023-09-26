@@ -21,11 +21,14 @@
   "exports": {
     ".": "./dist/index.js"
   },
+  "typings": "./dist/index.d.ts",
+  "main": "./dist/index.js",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "bundle": "npm run format:write && npm run package",
+    "build": "npm run format:write && npm run package",
+    "bundle": "npm run build",
     "ci-test": "jest",
     "format:write": "prettier --write **/*.ts",
     "format:check": "prettier --check **/*.ts",

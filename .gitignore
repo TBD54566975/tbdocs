@@ -101,3 +101,6 @@ __tests__/runner/*
 .idea
 .vscode
 *.code-workspace
+
+dist/*.d.ts
+dist/*.d.ts.map

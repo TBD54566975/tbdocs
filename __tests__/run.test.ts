@@ -7,7 +7,7 @@
  */
 
 import * as core from '@actions/core'
-import * as main from '../src/main'
+import * as run from '../src/run'
 
 // Mock the GitHub Actions core library
 const debugMock = jest.spyOn(core, 'debug')
@@ -16,7 +16,7 @@ const setFailedMock = jest.spyOn(core, 'setFailed')
 const setOutputMock = jest.spyOn(core, 'setOutput')
 
 // Mock the action's main function
-const runMock = jest.spyOn(main, 'run')
+const runMock = jest.spyOn(run, 'run')
 
 // Other utilities
 const timeRegex = /^\d{2}:\d{2}:\d{2}/
@@ -37,7 +37,7 @@ describe('action', () => {
       }
     })
 
-    await main.run()
+    await run.run()
     expect(runMock).toHaveReturned()
 
     // Verify that all of the core library functions were called correctly
@@ -72,7 +72,7 @@ describe('action', () => {
       }
     })
 
-    await main.run()
+    await run.run()
     expect(runMock).toHaveReturned()
 
     // Verify that all of the core library functions were called correctly

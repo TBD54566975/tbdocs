@@ -7,7 +7,7 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const docsReport: string = core.getInput('docs_report', { required: true })
+    const docsReport: string = core.getInput('docs_report')
     const ms: string = core.getInput('milliseconds')
 
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
@@ -25,4 +25,14 @@ export async function run(): Promise<void> {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
   }
+}
+
+const setupTypescriptExtractor = () => {
+  // check for the package json for these attributes
+  // "typings": "./dist/index.d.ts",
+  // "main": "./dist/index.js",
+  // check for tsconfig
+  // "declaration": true,
+  // "sourceMap": true,
+  // "declarationMap": true,
 }
