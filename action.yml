@@ -26,4 +26,6 @@ runs:
         node-version: 20
         cache: 'npm'
     - run: npm install -g @microsoft/api-extractor
+      shell: bash
     - run: node dist/main.js
+      shell: bash
