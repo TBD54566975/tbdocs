@@ -21,7 +21,7 @@
   "exports": {
     ".": "./dist/index.js"
   },
-  "typings": "./dist/index.d.ts",
+  "typings": "./dist/types/index.d.ts",
   "main": "./dist/index.js",
   "engines": {
     "node": ">=20"
@@ -33,7 +33,8 @@
     "format:write": "prettier --write **/*.ts",
     "format:check": "prettier --check **/*.ts",
     "lint": "npx eslint . -c ./.github/linters/.eslintrc.yml",
-    "package": "ncc build src/index.ts -e @microsoft/api-extractor --license licenses.txt",
+    "package": "tsc",
+    "package:ncc": "ncc build src/index.ts -e @microsoft/api-extractor --license licenses.txt",
     "package:watch": "npm run package -- --watch",
     "test": "(jest && make-coverage-badge --output-path ./badges/coverage.svg) || make-coverage-badge --output-path ./badges/coverage.svg",
     "all": "npm run format:write && npm run lint && npm run test && npm run package"

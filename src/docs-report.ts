@@ -6,6 +6,7 @@ import {
   ExtractorResult
 } from '@microsoft/api-extractor'
 
+// @beta
 export type DocsReporterType = 'api-extractor'
 
 export interface DocsReport {
