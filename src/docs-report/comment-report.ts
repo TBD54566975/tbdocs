@@ -6,6 +6,7 @@ import { GithubContextData, getGithubContext } from '../utils'
 
 const REPORT_HEADER_PREFIX = `**Relevant Docs Changes Detected**`
 const MISC_MESSAGES_GROUP = '_misc_group'
+const BOT_NAME = 'github-actions[bot]' // TODO: do we want a TBDocs branded bot?
 let githubContext: GithubContextData
 
 export const commentReportSummary = async (
@@ -115,7 +116,7 @@ const pushComment = async (commentBody: string): Promise<void> => {
 
 const createOrUpdateComment = async (
   octokit: ReturnType<typeof github.getOctokit>,
-  { owner, repo, issueNumber, actor }: GithubContextData,
+  { owner, repo, issueNumber }: GithubContextData,
   commentBody: string
 ): Promise<{ data: { url: string } }> => {
   // check if the comment exist
@@ -128,7 +129,7 @@ const createOrUpdateComment = async (
   const existingComment = comments.data.find(
     comment =>
       comment.body?.includes(REPORT_HEADER_PREFIX) &&
-      comment.user?.login === actor
+      comment.user?.login === BOT_NAME
   )
 
   if (existingComment) {
