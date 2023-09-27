@@ -188,7 +188,6 @@ const getPackageRequiredFields = (
 export const checkTsconfigProps = async (
   projectPath: string
 ): Promise<void> => {
-  // const tsconfig = await import('tsconfck')
   const tsConfigFile = await tsconfig.parse(projectPath)
   if (!tsConfigFile) {
     throw new Error('Could not resolve tsconfig.json')
