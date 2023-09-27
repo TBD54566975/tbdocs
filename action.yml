@@ -30,23 +30,3 @@ outputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - ${{ inputs.docs_report }}
-    - ${{ inputs.fail_on_error }}
-
-# runs:
-#   using: 'composite'
-#   steps:
-#     - uses: actions/setup-node@v3
-#       with:
-#         node-version: 20
-#         cache: 'npm'
-
-#     - name: Install API Extractor
-#       shell: bash
-#       run: npm ci
-      
-#     - name: Run Docs Report
-#       shell: bash
-#       run: node scripts/main.js
-      
