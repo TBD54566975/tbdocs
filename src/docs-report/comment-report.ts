@@ -53,6 +53,11 @@ const formatReportMessageRow = (message: ReportMessage): string => {
 }
 
 const pushComment = async (commentBody: string): Promise<void> => {
+  if (!configInputs.token) {
+    console.info('>>> Skipping pushing comment. Missing token...')
+    return
+  }
+
   const octokit = github.getOctokit(configInputs.token)
 
   const { owner, repo } = github.context.repo

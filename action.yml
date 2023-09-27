@@ -7,6 +7,9 @@ inputs:
     description: 'What is the docs report tool?'
     required: true
     default: 'api-extractor'
+  token:
+    description: 'Token used to submit comments summary and open PRs'
+    required: false
   fail_on_error:
     description: 'Should it fail on error?'
     required: false
