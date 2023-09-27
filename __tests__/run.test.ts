@@ -15,6 +15,33 @@ const setFailedMock = jest.spyOn(core, 'setFailed')
 const runDocsReportMock = jest.spyOn(docsReport, 'runDocsReport')
 const runMock = jest.spyOn(run, 'run')
 
+// mock @actions/github with jest
+jest.mock('@actions/github', () => ({
+  context: {
+    repo: {
+      owner: 'mocked-owner',
+      repo: 'mocked-repo'
+    },
+    issue: {
+      number: 1
+    }
+  },
+  getOctokit: jest.fn().mockImplementation(() => {
+    return {
+      rest: {
+        issues: {
+          createComment: jest.fn().mockResolvedValue({
+            data: {
+              id: 12345,
+              url: `https://github.com/mocked-owner/mocked-repo/issues/1#issuecomment-12345`,
+            },
+          }),
+        },
+      },
+    };
+  }),
+}))
+
 describe('action', () => {
   beforeEach(() => {
     jest.clearAllMocks()
