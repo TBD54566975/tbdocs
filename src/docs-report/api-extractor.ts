@@ -8,13 +8,11 @@ import {
 import path from 'path'
 
 import { DocsReport, DocsReporterType, MessageCategory, ReportMessage } from '.'
-import {
-  checkTsconfigProps,
-  escapeTextForGithub,
-  getJsonFile,
-  lookupFile
-} from '../utils'
+import { escapeTextForGithub, getJsonFile, lookupFile } from '../utils'
 import { configInputs } from '../config'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
+const tsconfig = require('tsconfck')
 
 export const generateApiExtractorReport = async (): Promise<DocsReport> => {
   const extractorConfig = initializeExtractorConfig()
@@ -111,9 +109,18 @@ const initializeExtractorConfig = (): ExtractorConfig => {
     )
     return ExtractorConfig.loadFileAndPrepare(apiExtractorCustomJson)
   } else {
-    console.info('>>> Automatically resolving api-extractor configs...')
+    const defaultApiExtractorJson = path.join(
+      __dirname,
+      '..',
+      '..',
+      'api-extractor.json'
+    )
+    console.info(
+      '>>> Automatically resolving api-extractor configs...',
+      defaultApiExtractorJson
+    )
 
-    const config = ExtractorConfig.loadFile('api-extractor.json')
+    const config = ExtractorConfig.loadFile(defaultApiExtractorJson)
 
     const initialProjectPath = configInputs.projectPath.startsWith('/')
       ? configInputs.projectPath
@@ -176,4 +183,25 @@ const getPackageRequiredFields = (
   }
 
   return { typings, main }
+}
+
+export const checkTsconfigProps = async (
+  projectPath: string
+): Promise<void> => {
+  // const tsconfig = await import('tsconfck')
+  const tsConfigFile = await tsconfig.parse(projectPath)
+  if (!tsConfigFile) {
+    throw new Error('Could not resolve tsconfig.json')
+  }
+
+  const tsConfig = tsConfigFile.tsconfig.config
+  if (
+    !tsConfig.compilerOptions ||
+    !tsConfig.compilerOptions.declaration ||
+    !tsConfig.compilerOptions.declarationMap
+  ) {
+    throw new Error(
+      'tsconfig.json must have declaration and declarationMap set to true'
+    )
+  }
 }

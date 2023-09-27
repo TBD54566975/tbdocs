@@ -5,16 +5,17 @@ export const lookupFile = (fileName: string, dir?: string): string => {
   const currentDirectory = dir ?? process.cwd()
   console.info(`Looking for ${fileName} in ${currentDirectory}...`)
 
-  const packageJsonPath = path.join(currentDirectory, fileName)
-  if (existsSync(packageJsonPath)) {
-    return packageJsonPath
+  const filePath = path.join(currentDirectory, fileName)
+  if (existsSync(filePath)) {
+    console.info(`Found ${filePath}!`)
+    return filePath
   } else {
     // lookup in the parent folder
     const parentDirectory = path.join(currentDirectory, '..')
 
     // check for not being in the root folder twice
     if (parentDirectory !== currentDirectory) {
-      return lookupFile(parentDirectory)
+      return lookupFile(fileName, parentDirectory)
     } else {
       throw new Error(`Could not find ${fileName}`)
     }
@@ -22,27 +23,6 @@ export const lookupFile = (fileName: string, dir?: string): string => {
 }
 
 export const getJsonFile = <T>(filePath: string): T => {
-  const jsonFile = readFileSync(filePath)
-  return JSON.parse(jsonFile.toString()) as T
-}
-
-interface TsConfigRequiredFields {
-  compilerOptions?: {
-    declaration?: boolean
-    declarationMap?: boolean
-  }
-}
-
-export const checkTsconfigProps = (projectPath: string): void => {
-  const tsConfigFilePath = lookupFile('tsconfig.json', projectPath)
-  const tsConfig = getJsonFile<TsConfigRequiredFields>(tsConfigFilePath)
-  if (
-    !tsConfig.compilerOptions ||
-    !tsConfig.compilerOptions.declaration ||
-    !tsConfig.compilerOptions.declarationMap
-  ) {
-    throw new Error(
-      'tsconfig.json must have declaration and declarationMap set to true'
-    )
-  }
+  const jsonFile = readFileSync(filePath, 'utf-8')
+  return JSON.parse(jsonFile) as T
 }
