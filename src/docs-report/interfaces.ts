@@ -1,6 +1,7 @@
-// @beta
+/** @beta */
 export type DocsReporterType = 'api-extractor'
 
+/** @beta */
 export interface DocsReport {
   reporter: DocsReporterType
   errorsCount: number
@@ -8,10 +9,13 @@ export interface DocsReport {
   messages: ReportMessage[]
 }
 
+/** @beta */
 export type MessageCategory = 'compiler' | 'docs' | 'extractor' | 'unknown'
 
+/** @beta */
 export type MessageLevel = 'error' | 'warning' | 'info' | 'verbose' | 'none'
 
+/** @beta */
 export interface ReportMessage {
   level: MessageLevel
   category: MessageCategory
