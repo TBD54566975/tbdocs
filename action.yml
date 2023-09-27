@@ -7,6 +7,10 @@ inputs:
     description: 'What is the docs report tool?'
     required: true
     default: 'api-extractor'
+  project_path:
+    description: 'Path to the project root'
+    required: false
+    default: '.'
   token:
     description: 'Token used to submit comments summary and open PRs'
     required: false

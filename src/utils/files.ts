@@ -3,6 +3,7 @@ import path from 'path'
 
 export const lookupFile = (fileName: string, dir?: string): string => {
   const currentDirectory = dir ?? process.cwd()
+  console.info(`Looking for ${fileName} in ${currentDirectory}...`)
 
   const packageJsonPath = path.join(currentDirectory, fileName)
   if (existsSync(packageJsonPath)) {

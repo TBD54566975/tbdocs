@@ -114,18 +114,23 @@ const initializeExtractorConfig = (): ExtractorConfig => {
     console.info('>>> Automatically resolving api-extractor configs...')
 
     const config = ExtractorConfig.loadFile('api-extractor.json')
-    const packageJsonFullPath = lookupFile('package.json')
-    const projectFolder = path.dirname(packageJsonFullPath)
 
-    checkTsconfigProps(projectFolder)
+    const initialProjectPath = configInputs.projectPath.startsWith('/')
+      ? configInputs.projectPath
+      : path.join(process.cwd(), configInputs.projectPath)
+    const packageJsonFullPath = lookupFile('package.json', initialProjectPath)
+
+    const projectPath = path.dirname(packageJsonFullPath)
+
+    checkTsconfigProps(projectPath)
 
     const { typings } = getPackageRequiredFields(packageJsonFullPath)
-    config.projectFolder = projectFolder
+    config.projectFolder = projectPath
     config.mainEntryPointFilePath = typings
 
     console.info('>>> Api extractor config:', {
       typings,
-      projectFolder,
+      projectPath,
       packageJsonFullPath
     })
 
