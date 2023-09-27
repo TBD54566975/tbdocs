@@ -1,26 +1,42 @@
-# Create a JavaScript Action Using TypeScript
+# TBDocs
 
 [![GitHub Super-Linter](https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
 ![CI](https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg)
 
-Use this template to bootstrap the creation of a TypeScript action. :rocket:
+Tool for automating docs generation from source codes docs annotations (like TSDocs, JavaDocs, JsDocs etc.) to SSR websites that supports markdown (like Docusaurus, Hugo, Jekyll etc.).
 
-This template includes compilation support, tests, a validation workflow,
-publishing, and versioning guidance.
+We are in the MVP phase testing **TSDocs -> Docusaurus only**.
 
-If you are new, there's also a simpler introduction in the
-[Hello world JavaScript action repository](https://github.com/actions/hello-world-javascript-action).
+## Overview
 
-## Create Your Own Action
+TBDocs has two main components:
+- **docs-report**: scan your codebase to find docs annotations errors or accidental apis exposures, undocumented apis, forgotten apis that should be exposed.
+- **docs-generator**: scan your codebase to extract all the docs annotations and generate markdown files.
 
-To create your own action, you can use this repository as a template! Just
-follow the below instructions:
+**Regular PRs against main branch:**
+```mermaid
+flowchart TD
+   A[Source Code] --> PR[New PR]
+  PR --> DR[docs-report]
+```
 
-1. Click the **Use this template** button at the top of the repository
-1. Select **Create a new repository**
-1. Select an owner and name for your new repository
-1. Click **Create repository**
-1. Clone your new repository
+
+**Cutting new Releases with Release PR + Auto SSR Preview:**
+```mermaid
+flowchart TD
+  B[New Release] --> DG[docs-generator]
+  DG --> PRR[Release PR]
+  DG --> SSR[Auto-generated MDs to SSR PR]
+  PRR --> DR2[docs-report]
+```
+
+  
+### Supported Pipelines
+
+**Typescript**
+- docs standard: [TSDoc](https://tsdoc.org/)
+- docs-report: [api-extractor](https://api-extractor.com/pages/overview/intro/)
+- docs-generator: [typedoc-plugin-markdown](https://github.com/tgreyuk/typedoc-plugin-markdown)
 
 ## Initial Setup
 
@@ -31,10 +47,8 @@ need to perform some initial setup steps before you can develop your action.
 >
 > You'll need to have a reasonably modern version of
 > [Node.js](https://nodejs.org) handy. If you are using a version manager like
-> [`nodenv`](https://github.com/nodenv/nodenv) or
-> [`nvm`](https://github.com/nvm-sh/nvm), you can run `nodenv install` in the
-> root of your repository to install the version specified in
-> [`package.json`](./package.json). Otherwise, 20.x or later should work!
+> [`nvm`](https://github.com/nvm-sh/nvm), you can run `nvm use` in the
+> root of the repository. Otherwise, 20.x or later should work!
 
 1. :hammer_and_wrench: Install the dependencies
 
@@ -72,37 +86,10 @@ inputs, and outputs for your action.
 
 ## Update the Action Code
 
-The [`src/`](./src/) directory is the heart of your action! This contains the
-source code that will be run when your action is invoked. You can replace the
-contents of this directory with your own code.
-
-There are a few things to keep in mind when writing your action code:
-
-- Most GitHub Actions toolkit and CI/CD operations are processed asynchronously.
-  In `main.ts`, you will see that the action is run in an `async` function.
-
-  ```javascript
-  import * as core from '@actions/core'
-  //...
-
-  async function run() {
-    try {
-      //...
-    } catch (error) {
-      core.setFailed(error.message)
-    }
-  }
-  ```
-
-  For more information about the GitHub Actions toolkit, see the
-  [documentation](https://github.com/actions/toolkit/blob/master/README.md).
-
-So, what are you waiting for? Go ahead and start customizing your action!
-
 1. Create a new branch
 
    ```bash
-   git checkout -b releases/v1
+   git checkout -b <new-branch-name>
    ```
 
 1. Replace the contents of `src/` with your action code
@@ -112,15 +99,6 @@ So, what are you waiting for? Go ahead and start customizing your action!
    ```bash
    npm run all
    ```
-
-   > [!WARNING]
-   >
-   > This step is important! It will run [`ncc`](https://github.com/vercel/ncc)
-   > to build the final JavaScript action code with all dependencies included.
-   > If you do not run this step, your action will not work correctly when it is
-   > used in a workflow. This step also includes the `--license` option for
-   > `ncc`, which will create a license file for all of the production node
-   > modules used in your project.
 
 1. Commit your changes
 
@@ -132,7 +110,7 @@ So, what are you waiting for? Go ahead and start customizing your action!
 1. Push them to your repository
 
    ```bash
-   git push -u origin releases/v1
+   git push -u origin <new-branch-name>
    ```
 
 1. Create a pull request and get feedback on your action
@@ -140,35 +118,14 @@ So, what are you waiting for? Go ahead and start customizing your action!
 
 Your action is now published! :rocket:
 
-For information about versioning your action, see
+For information about versioning the action, see
 [Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
 in the GitHub Actions toolkit.
 
 ## Validate the Action
 
 You can now validate the action by referencing it in a workflow file. For
-example, [`ci.yml`](./.github/workflows/ci.yml) demonstrates how to reference an
-action in the same repository.
-
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v3
-
-  - name: Test Local Action
-    id: test-action
-    uses: ./
-    with:
-      milliseconds: 1000
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
-```
-
-For example workflow runs, check out the
-[Actions tab](https://github.com/actions/typescript-action/actions)! :rocket:
+example, [`ci.yml`](./.github/workflows/ci.yml) demonstrates how we are referencing our action in the same repository.
 
 ## Usage
 
