@@ -8,7 +8,12 @@ import {
 import path from 'path'
 
 import { DocsReport, DocsReporterType, MessageCategory, ReportMessage } from '.'
-import { checkTsconfigProps, getJsonFile, lookupFile } from '../utils'
+import {
+  checkTsconfigProps,
+  escapeTextForGithub,
+  getJsonFile,
+  lookupFile
+} from '../utils'
 import { configInputs } from '../config'
 
 export const generateApiExtractorReport = async (): Promise<DocsReport> => {
@@ -56,7 +61,7 @@ const processApiExtractorMessage = (
     level: message.logLevel,
     category: getCategoryFromApiExtractor(message.category),
     messageId: message.messageId,
-    text: message.text,
+    text: escapeTextForGithub(message.text),
     sourceFilePath: message.sourceFilePath,
     sourceFileLine: message.sourceFileLine,
     sourceFileColumn: message.sourceFileColumn,

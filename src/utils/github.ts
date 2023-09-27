@@ -11,6 +11,15 @@ export interface GithubContextData {
   commitUrl: string
 }
 
+export const escapeTextForGithub = (input: string): string => {
+  let output = input
+
+  // Escape GitHub Usernames tags
+  output = input.replace(/@([a-zA-Z0-9-]+)/g, '`@$1`')
+
+  return output
+}
+
 export const getGithubContext = (): GithubContextData => {
   const { repo: repoData, issue, sha, actor } = github.context
 
