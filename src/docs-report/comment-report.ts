@@ -4,7 +4,7 @@ import { DocsReport, ReportMessage } from '.'
 import { configInputs } from '../config'
 import { GithubContextData, getGithubContext } from '../utils'
 
-const REPORT_HEADER_PREFIX = `**Relevant Docs Changes Detected**`
+const REPORT_HEADER_PREFIX = `**TBDocs Report**`
 const MISC_MESSAGES_GROUP = '_misc_group'
 const BOT_NAME = 'github-actions[bot]' // TODO: do we want a TBDocs branded bot?
 let githubContext: GithubContextData
@@ -13,24 +13,30 @@ export const commentReportSummary = async (
   report: DocsReport
 ): Promise<void> => {
   githubContext = getGithubContext()
-  const commentBody = generateCommentBody(report)
+  const reportHasIssues = report.errorsCount > 0 || report.warningsCount > 0
+  const commentBody = generateCommentBody(report, reportHasIssues)
   console.info(`>>> Report comment`, commentBody)
-  pushComment(commentBody)
+  pushComment(commentBody, reportHasIssues)
 }
 
-const generateCommentBody = (report: DocsReport): string => {
-  const headerText =
-    `${REPORT_HEADER_PREFIX}\n\n` +
-    `🛑 Errors: ${report.errorsCount}\n` +
-    `⚠️ Warnings: ${report.warningsCount}`
+const generateCommentBody = (
+  report: DocsReport,
+  reportHasIssues: boolean
+): string => {
+  const headerText = `${REPORT_HEADER_PREFIX}`
+
+  const subHeaderText = reportHasIssues
+    ? `🛑 Errors: ${report.errorsCount}\n` +
+      `⚠️ Warnings: ${report.warningsCount}`
+    : `✅ No errors or warnings`
 
   const filesTable = generateFilesTable(report)
 
-  const updateFooterText = `Last report updated @ ${new Date().toISOString()} - Commit: [\`${
+  const updateFooterText = `_Updated @ ${new Date().toISOString()} - Commit: [\`${
     githubContext.shortSha
-  }\`](${githubContext.commitUrl})`
+  }\`](${githubContext.commitUrl})_`
 
-  return `${headerText}\n\n${filesTable}\n\n---\n${updateFooterText}`
+  return `${headerText}\n\n${subHeaderText}\n\n${filesTable}\n\n---\n${updateFooterText}`
 }
 
 const generateFilesTable = (report: DocsReport): string => {
@@ -85,7 +91,10 @@ const getMessageLog = (
   return `| ${flag} ${message.category}:${message.messageId}: ${message.text} ${link} |`
 }
 
-const pushComment = async (commentBody: string): Promise<void> => {
+const pushComment = async (
+  commentBody: string,
+  reportHasIssues: boolean
+): Promise<void> => {
   if (!configInputs.token) {
     console.info('>>> Skipping pushing comment. Missing token...')
     return
@@ -106,9 +115,13 @@ const pushComment = async (commentBody: string): Promise<void> => {
     const comment = await createOrUpdateComment(
       octokit,
       githubContext,
+      reportHasIssues,
       commentBody
     )
-    console.info(`Comment: ${comment.data.url}`)
+
+    if (comment) {
+      console.info(`Comment: ${comment?.data.url}`)
+    }
   } else {
     console.info('>>> Skipping comment. Missing owner, repo or issueNumber')
   }
@@ -117,8 +130,9 @@ const pushComment = async (commentBody: string): Promise<void> => {
 const createOrUpdateComment = async (
   octokit: ReturnType<typeof github.getOctokit>,
   { owner, repo, issueNumber }: GithubContextData,
+  reportHasIssues: boolean,
   commentBody: string
-): Promise<{ data: { url: string } }> => {
+): Promise<{ data: { url: string } } | undefined> => {
   // check if the comment exist
   const comments = await octokit.rest.issues.listComments({
     owner,
@@ -142,7 +156,8 @@ const createOrUpdateComment = async (
       comment_id: existingComment.id,
       body: commentBody
     })
-  } else {
+    // only create a brand new comment if there are issues
+  } else if (reportHasIssues) {
     console.info(`>>> Creating a brand new comment for the report`)
     return octokit.rest.issues.createComment({
       owner,
@@ -150,5 +165,7 @@ const createOrUpdateComment = async (
       issue_number: issueNumber,
       body: commentBody
     })
+  } else {
+    console.info(`>>> Skipping comment. No issues found.`)
   }
 }
