@@ -26,7 +26,7 @@ export const generateApiExtractorReport = async (): Promise<DocsReport> => {
 
   // Invoke API Extractor
   const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
-    localBuild: false,
+    localBuild: true,
     // showVerboseMessages: true,
     // showDiagnostics: true,
     messageCallback: message => processApiExtractorMessage(report, message)
