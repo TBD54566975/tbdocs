@@ -40,20 +40,17 @@ jobs:
         id: npm-build
         run: npm run build
 
-      - name: Test
-        id: npm-ci-test
-        run: npm run ci-test
-
       - name: TBDocs Reporter
         id: tbdocs-reporter
         uses: ./
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List reporter output
-        run: ls -la ./reporter
+      - name: Test
+        id: npm-ci-test
+        run: npm run ci-test
 
-      - name: Save reporter artifacts
+      - name: Save Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: tbdocs-reporter-output
