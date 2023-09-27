@@ -75,6 +75,21 @@ need to perform some initial setup steps before you can develop your action.
    ...
    ```
 
+## Running locally
+
+```sh
+export GITHUB_REPOSITORY=test/test
+node scripts/main.js
+```
+
+## Testing with Docker
+
+```sh
+docker build -f Dockerfile . --tag tbdocs-app:latest --progress plain
+
+docker run --env GITHUB_REPOSITORY=mock1/mock2 tbdocs-app
+```
+
 ## Update the Action Metadata
 
 The [`action.yml`](action.yml) file defines metadata about your action, such as

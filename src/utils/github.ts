@@ -29,7 +29,7 @@ export const getGithubContext = (): GithubContextData => {
 
   const { owner, repo } = repoData
 
-  const shortSha = sha.slice(0, 7)
+  const shortSha = (sha || '').slice(0, 7)
   const blobBaseUrl = `https://github.com/${owner}/${repo}/blob/${sha}`
   const commitUrl = `https://github.com/${owner}/${repo}/commit/${sha}`
 
