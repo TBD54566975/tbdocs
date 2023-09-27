@@ -60,7 +60,7 @@ const generateFilesTable = (report: DocsReport): string => {
     const fileTitle =
       file === MISC_MESSAGES_GROUP
         ? `🔀 Misc.`
-        : `📄 **File**: [${file}](${file})`
+        : `📄 **File**: [${file}](${githubContext.blobBaseUrl}/${file})`
 
     const fileHeaderRow = `| ${fileTitle} |\n| --- |`
     const messagesRows = `${messages.join('\n')}`
@@ -79,7 +79,7 @@ const getMessageLog = (
 
   const link =
     relativePath && message.sourceFileLine
-      ? `[#L${message.sourceFileLine}](${githubContext.blobBaseUrl}/${relativePath}}#L${message.sourceFileLine})`
+      ? `[#L${message.sourceFileLine}](${githubContext.blobBaseUrl}/${relativePath}#L${message.sourceFileLine})`
       : ''
 
   return `| ${flag} ${message.category}:${message.messageId}: ${message.text} ${link} |`
