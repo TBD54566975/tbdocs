@@ -5,7 +5,8 @@ import { runDocsReport } from './docs-report'
 
 /**
  * The main function for the action.
- * @returns {Promise<void>} Resolves when the action is complete.
+ * @returns `Promise<void>` Resolves when the action is complete.
+ * @beta
  */
 export async function run(): Promise<void> {
   try {

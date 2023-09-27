@@ -8,6 +8,7 @@ import { configInputs } from '../config'
 
 export * from './interfaces'
 
+/** @beta */
 export const runDocsReport = async (): Promise<void> => {
   const report = await generateReport(configInputs.docsReport)
   await processReport(report)

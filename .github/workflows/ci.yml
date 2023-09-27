@@ -50,10 +50,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List reporter output
-        run: ls -la ./reporter
-
-      - name: Save reporter artifacts
+      - name: Save Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: tbdocs-reporter-output

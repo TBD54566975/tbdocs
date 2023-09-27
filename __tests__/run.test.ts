@@ -24,7 +24,8 @@ jest.mock('@actions/github', () => ({
     },
     issue: {
       number: 1
-    }
+    },
+    sha: 'abcd1234efgh5678'
   },
   getOctokit: jest.fn().mockImplementation(() => {
     return {
@@ -47,7 +48,7 @@ describe('action', () => {
     jest.clearAllMocks()
   })
 
-  it('sets the time output', async () => {
+  it('runs successfully', async () => {
     await run.run()
     expect(runMock).toHaveReturned()
     expect(runDocsReportMock).toHaveBeenCalledTimes(1)
