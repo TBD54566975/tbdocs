@@ -2,71 +2,86 @@ import * as github from '@actions/github'
 
 import { DocsReport, ReportMessage } from '.'
 import { configInputs } from '../config'
+import { GithubContextData, getGithubContext } from '../utils'
+
+const REPORT_HEADER_PREFIX = `**Relevant Docs Changes Detected**`
+const MISC_MESSAGES_GROUP = '_misc_group'
+let githubContext: GithubContextData
 
 export const commentReportSummary = async (
   report: DocsReport
 ): Promise<void> => {
+  githubContext = getGithubContext()
   const commentBody = generateCommentBody(report)
   console.info(`>>> Report comment`, commentBody)
   pushComment(commentBody)
 }
 
-const MISC_ERRORS_TITLE = 'Misc'
-
 const generateCommentBody = (report: DocsReport): string => {
-  let summaryMarkdownText =
-    `**Docs Report Summary**\n\n` +
+  const headerText =
+    `${REPORT_HEADER_PREFIX}\n\n` +
     `🛑 Errors: ${report.errorsCount}\n` +
-    `⚠️ Warnings: ${report.warningsCount}\n\n`
+    `⚠️ Warnings: ${report.warningsCount}`
 
-  const commentLines = report.messages.map(message => {
-    const sanitizedFilename = message.sourceFilePath
+  const filesTable = generateFilesTable(report)
+
+  const updateFooterText = `Last report updated @ ${new Date().toISOString()} - Commit: [\`${
+    githubContext.shortSha
+  }\`](${githubContext.commitUrl})`
+
+  return `${headerText}\n\n${filesTable}\n\n---\n${updateFooterText}`
+}
+
+const generateFilesTable = (report: DocsReport): string => {
+  const filesMessagesPairs = report.messages.map(message => {
+    const relativeFilePath = message.sourceFilePath
       ? message.sourceFilePath.replace('/github/workspace/', '')
-      : MISC_ERRORS_TITLE
-
+      : undefined
     return {
-      file: sanitizedFilename,
-      line: formatReportMessageRow(message, sanitizedFilename)
+      file: relativeFilePath,
+      message: getMessageLog(message, relativeFilePath)
     }
   })
 
-  const summaryLines = {} as Record<string, string[]>
-  for (const line of commentLines) {
-    if (!summaryLines[line.file]) {
-      summaryLines[line.file] = []
-    }
-    summaryLines[line.file].push(line.line)
+  // group messages by file in a map of: file => messages[]
+  const messagesByFile = new Map<string, string[]>()
+  for (const { file, message } of filesMessagesPairs) {
+    const fileKey = file || MISC_MESSAGES_GROUP
+    const fileMessages = messagesByFile.get(fileKey) || []
+    messagesByFile.set(fileKey, [...fileMessages, message])
   }
 
-  summaryMarkdownText += '```\n'
-  for (const file in summaryLines) {
-    const lines = summaryLines[file]
+  let markdownTable = ''
+
+  for (const file of messagesByFile.keys()) {
+    const messages = messagesByFile.get(file) || []
+
     const fileTitle =
-      file === MISC_ERRORS_TITLE
-        ? `🔀 ${MISC_ERRORS_TITLE}`
+      file === MISC_MESSAGES_GROUP
+        ? `🔀 Misc.`
         : `📄 **File**: [${file}](${file})`
-    const fileMarkdownSummary = `${fileTitle}\n${lines.join('\n')}`
-    summaryMarkdownText += `${fileMarkdownSummary}\n\n`
-  }
-  summaryMarkdownText += '\n```'
 
-  return summaryMarkdownText
+    const fileHeaderRow = `| ${fileTitle} |\n| --- |`
+    const messagesRows = `${messages.join('\n')}`
+    markdownTable += `${fileHeaderRow}\n${messagesRows}\n\n`
+  }
+
+  return markdownTable
 }
 
-const formatReportMessageRow = (
+const getMessageLog = (
   message: ReportMessage,
-  sanitizedFilename: string
+  relativePath?: string
 ): string => {
   const flag =
     message.level === 'error' ? '🛑' : message.level === 'warning' ? '⚠️' : '➡️'
 
-  const link = message.sourceFileLine
-    ? `[L${message.sourceFileLine}](${sanitizedFilename}#L${message.sourceFileLine})`
-    : message.sourceFilePath && sanitizedFilename !== MISC_ERRORS_TITLE
-    ? `[file](${sanitizedFilename})`
-    : ''
+  const link =
+    relativePath && message.sourceFileLine
+      ? `[#L${message.sourceFileLine}](${githubContext.blobBaseUrl}/${relativePath}}#L${message.sourceFileLine})`
+      : ''
 
-  return `${flag} ${message.category}:${message.messageId}: ${message.text} ${link}`
+  return `| ${flag} ${message.category}:${message.messageId}: ${message.text} ${link} |`
 }
 
 const pushComment = async (commentBody: string): Promise<void> => {
@@ -76,21 +91,70 @@ const pushComment = async (commentBody: string): Promise<void> => {
   }
 
   const octokit = github.getOctokit(configInputs.token)
+  const { data: auth } = await octokit.rest.users.getAuthenticated()
 
-  const { owner, repo } = github.context.repo
-  const issueNumber = github.context.issue.number
-  console.info('>>> Pushing comment to', { owner, repo, issueNumber })
+  const { owner, repo, issueNumber } = githubContext
+  console.info('>>> Pushing comment to', {
+    owner,
+    repo,
+    issueNumber,
+    authLogin: auth.login
+  })
 
   if (owner && repo && issueNumber) {
     // create a comment on the issue
-    const comment = await octokit.rest.issues.createComment({
+    const comment = await createOrUpdateComment(
+      octokit,
+      auth.login,
+      owner,
+      repo,
+      issueNumber,
+      commentBody
+    )
+    console.info(`Comment: ${comment.data.url}`)
+  } else {
+    console.info('>>> Skipping comment. Missing owner, repo or issueNumber')
+  }
+}
+
+const createOrUpdateComment = async (
+  octokit: ReturnType<typeof github.getOctokit>,
+  authLogin: string,
+  owner: string,
+  repo: string,
+  issueNumber: number,
+  commentBody: string
+): Promise<{ data: { url: string } }> => {
+  // check if the comment exist
+  const comments = await octokit.rest.issues.listComments({
+    owner,
+    repo,
+    issue_number: issueNumber
+  })
+
+  const existingComment = comments.data.find(
+    comment =>
+      comment.body?.includes(REPORT_HEADER_PREFIX) &&
+      comment.user?.login === authLogin
+  )
+
+  if (existingComment) {
+    console.info(
+      `>>> Updating existing comment ${existingComment.id} for the report`
+    )
+    return octokit.rest.issues.updateComment({
+      owner,
+      repo,
+      comment_id: existingComment.id,
+      body: commentBody
+    })
+  } else {
+    console.info(`>>> Creating a brand new comment for the report`)
+    return octokit.rest.issues.createComment({
       owner,
       repo,
       issue_number: issueNumber,
       body: commentBody
     })
-    console.info(`Comment created: ${comment.data.url}`)
-  } else {
-    console.info('>>> Skipping comment. Missing owner, repo or issueNumber')
   }
 }
