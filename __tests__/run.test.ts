@@ -33,13 +33,13 @@ jest.mock('@actions/github', () => ({
           createComment: jest.fn().mockResolvedValue({
             data: {
               id: 12345,
-              url: `https://github.com/mocked-owner/mocked-repo/issues/1#issuecomment-12345`,
-            },
-          }),
-        },
-      },
-    };
-  }),
+              url: `https://github.com/mocked-owner/mocked-repo/issues/1#issuecomment-12345`
+            }
+          })
+        }
+      }
+    }
+  })
 }))
 
 describe('action', () => {

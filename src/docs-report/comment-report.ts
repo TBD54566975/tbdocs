@@ -33,7 +33,7 @@ const generateCommentBody = (report: DocsReport): string => {
   for (const file in summaryLines) {
     const lines = summaryLines[file]
     const fileMarkdownSummary = `File: **${file}**\n\n- ${lines.join('\n- ')}`
-    summaryMarkdownText += fileMarkdownSummary + '\n\n'
+    summaryMarkdownText += `${fileMarkdownSummary}\n\n`
   }
 
   return summaryMarkdownText
