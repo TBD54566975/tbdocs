@@ -3,6 +3,7 @@ import * as github from '@actions/github'
 export interface GithubContextData {
   owner: string
   repo: string
+  actor: string
   sha: string
   shortSha: string
   issueNumber: number
@@ -11,7 +12,7 @@ export interface GithubContextData {
 }
 
 export const getGithubContext = (): GithubContextData => {
-  const { repo: repoData, issue, sha } = github.context
+  const { repo: repoData, issue, sha, actor } = github.context
 
   if (!repoData) {
     throw new Error('Missing Github Context data')
@@ -26,6 +27,7 @@ export const getGithubContext = (): GithubContextData => {
   return {
     owner,
     repo,
+    actor,
     sha,
     shortSha,
     issueNumber: issue.number,

@@ -91,24 +91,20 @@ const pushComment = async (commentBody: string): Promise<void> => {
   }
 
   const octokit = github.getOctokit(configInputs.token)
-  const { data: auth } = await octokit.rest.users.getAuthenticated()
 
-  const { owner, repo, issueNumber } = githubContext
+  const { owner, repo, issueNumber, actor } = githubContext
   console.info('>>> Pushing comment to', {
     owner,
     repo,
     issueNumber,
-    authLogin: auth.login
+    actor
   })
 
   if (owner && repo && issueNumber) {
     // create a comment on the issue
     const comment = await createOrUpdateComment(
       octokit,
-      auth.login,
-      owner,
-      repo,
-      issueNumber,
+      githubContext,
       commentBody
     )
     console.info(`Comment: ${comment.data.url}`)
@@ -119,10 +115,7 @@ const pushComment = async (commentBody: string): Promise<void> => {
 
 const createOrUpdateComment = async (
   octokit: ReturnType<typeof github.getOctokit>,
-  authLogin: string,
-  owner: string,
-  repo: string,
-  issueNumber: number,
+  { owner, repo, issueNumber, actor }: GithubContextData,
   commentBody: string
 ): Promise<{ data: { url: string } }> => {
   // check if the comment exist
@@ -135,7 +128,7 @@ const createOrUpdateComment = async (
   const existingComment = comments.data.find(
     comment =>
       comment.body?.includes(REPORT_HEADER_PREFIX) &&
-      comment.user?.login === authLogin
+      comment.user?.login === actor
   )
 
   if (existingComment) {
