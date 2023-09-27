@@ -88,7 +88,17 @@ const getMessageLog = (
       ? `[#L${message.sourceFileLine}](${githubContext.blobBaseUrl}/${relativePath}#L${message.sourceFileLine})`
       : ''
 
-  return `| ${flag} ${message.category}:${message.messageId}: ${message.text} ${link} |`
+  const text = escapeText(message.text)
+  return `| ${flag} \`${message.category}:${message.messageId}\`: ${text} ${link} |`
+}
+
+const escapeText = (input: string): string => {
+  let output = input
+
+  // Escape GitHub Usernames tags
+  output = input.replace(/@([a-zA-Z0-9-]+)/g, '`@$1`')
+
+  return output
 }
 
 const pushComment = async (
