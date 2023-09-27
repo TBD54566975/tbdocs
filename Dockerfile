@@ -26,4 +26,4 @@ COPY --from=build /app ./
 EXPOSE 3000
 
 # Start the app
-ENTRYPOINT ["node", "scripts/main.js"]
+ENTRYPOINT ["node", "/app/scripts/main.js"]
