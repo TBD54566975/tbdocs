@@ -13,6 +13,8 @@ RUN npm ci --only=production
 # Copy the rest of the app source code
 COPY . .
 
+RUN npm run build
+
 # Stage 2: Create the final runtime image
 FROM node:20-alpine
 
@@ -21,9 +23,6 @@ WORKDIR /app
 
 # Copy the built app from the previous stage
 COPY --from=build /app ./
-
-# Expose the port the app will run on
-EXPOSE 3000
 
 # Start the app
 ENTRYPOINT ["node", "/app/scripts/main.js"]

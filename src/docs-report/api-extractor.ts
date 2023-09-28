@@ -11,11 +11,8 @@ import { DocsReport, DocsReporterType, MessageCategory, ReportMessage } from '.'
 import { escapeTextForGithub, getJsonFile, lookupFile } from '../utils'
 import { configInputs } from '../config'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
-const tsconfig = require('tsconfck')
-
 export const generateApiExtractorReport = async (): Promise<DocsReport> => {
-  const extractorConfig = initializeExtractorConfig()
+  const extractorConfig = await initializeExtractorConfig()
 
   const report = {
     reporter: 'api-extractor' as DocsReporterType,
@@ -99,7 +96,7 @@ const getCategoryFromApiExtractor = (
   }
 }
 
-const initializeExtractorConfig = (): ExtractorConfig => {
+const initializeExtractorConfig = async (): Promise<ExtractorConfig> => {
   const apiExtractorCustomJson = configInputs.apiExtractor.jsonPath
 
   if (apiExtractorCustomJson) {
@@ -129,7 +126,7 @@ const initializeExtractorConfig = (): ExtractorConfig => {
 
     const projectPath = path.dirname(packageJsonFullPath)
 
-    checkTsconfigProps(projectPath)
+    await checkTsconfigProps(projectPath)
 
     const { typings } = getPackageRequiredFields(packageJsonFullPath)
     config.projectFolder = projectPath
@@ -185,15 +182,21 @@ const getPackageRequiredFields = (
   return { typings, main }
 }
 
-export const checkTsconfigProps = async (
-  projectPath: string
-): Promise<void> => {
-  const tsConfigFile = await tsconfig.parse(projectPath)
-  if (!tsConfigFile) {
+const checkTsconfigProps = async (projectPath: string): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
+  const tsconfig = require('tsconfck')
+  // const tsconfig = await import('tsconfck')
+
+  const tsc = await tsconfig.parse(path.join(projectPath, 'tsconfig.json'))
+
+  if (!tsc?.tsconfigFile) {
     throw new Error('Could not resolve tsconfig.json')
   }
 
-  const tsConfig = tsConfigFile.tsconfig.config
+  console.info('>>> tsconfig.json:', { tsc })
+  console.info('>>> tsconfig file', tsc.tsconfigFile)
+
+  const tsConfig = tsc.tsconfig
   if (
     !tsConfig.compilerOptions ||
     !tsConfig.compilerOptions.declaration ||
