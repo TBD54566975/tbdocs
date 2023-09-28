@@ -11,6 +11,9 @@ import { DocsReport, DocsReporterType, MessageCategory, ReportMessage } from '.'
 import { escapeTextForGithub, getJsonFile, lookupFile } from '../utils'
 import { configInputs } from '../config'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
+const tsconfig = require('tsconfck')
+
 export const generateApiExtractorReport = async (): Promise<DocsReport> => {
   const extractorConfig = await initializeExtractorConfig()
 
@@ -183,8 +186,6 @@ const getPackageRequiredFields = (
 }
 
 const checkTsconfigProps = async (projectPath: string): Promise<void> => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
-  const tsconfig = require('tsconfck')
   // const tsconfig = await import('tsconfck')
 
   const tsc = await tsconfig.parse(path.join(projectPath, 'tsconfig.json'))

@@ -85,10 +85,14 @@ node scripts/main.js
 ## Testing with Docker
 
 ```sh
-docker build -f Dockerfile . --tag tbdocs-app:latest --progress plain
+docker build -f Dockerfile . --tag tbdocs-app:latest
 
 # now from the repo you want to analyze
-docker run -v $(pwd):/github/workspace/ --workdir /github/workspace -e "GITHUB_REPOSITORY=mock1/mock2" -e "INPUT_PROJECT_PATH=." tbdocs-app
+docker run -v $(pwd):/github/workspace/ \
+   --workdir /github/workspace          \
+   -e "GITHUB_REPOSITORY=org/repo"      \
+   -e "INPUT_PROJECT_PATH=."            \
+   tbdocs-app
 ```
 
 ## Update the Action Metadata
