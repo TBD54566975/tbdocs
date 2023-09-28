@@ -1,8 +1,9 @@
 import { getInput } from '@actions/core'
-import { DocsReporterType } from './docs-report'
+import { DocsReporterType, DocsGeneratorType } from './docs-report'
 
 export const configInputs = {
-  docsReport: (getInput('docs_report') || 'api-extractor') as DocsReporterType,
+  docsReport: (getInput('docs_report') || '') as DocsReporterType,
+  docsGenerator: (getInput('docs_generator') || '') as DocsGeneratorType,
   failOnError: getInput('fail_on_error') === 'true',
   projectPath: getInput('project_path') || '.',
   token: getInput('token'),

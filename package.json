@@ -72,7 +72,9 @@
     "@actions/github": "^5.1.1",
     "@microsoft/api-extractor": "^7.37.1",
     "fs": "^0.0.1-security",
-    "tsconfck": "^2.1.2"
+    "tsconfck": "^2.1.2",
+    "typedoc": "^0.25.1",
+    "typedoc-plugin-markdown": "^3.16.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.5",

@@ -19,28 +19,28 @@
   "apiReport": {
     "enabled": true,
     // "reportFileName": "<unscopedPackageName>.api.md",
-    "reportFolder": "<projectFolder>/reporter",
+    "reportFolder": "<projectFolder>/.tbdocs/reporter",
     // "reportTempFolder": "<projectFolder>/temp/",
     "includeForgottenExports": true
   },
   "docModel": {
     "enabled": true,
-    "apiJsonFilePath": "<projectFolder>/reporter/<unscopedPackageName>.api.json"
+    "apiJsonFilePath": "<projectFolder>/.tbdocs/reporter/<unscopedPackageName>.api.json"
     // "includeForgottenExports": false,
     // "projectFolderUrl": "http://github.com/path/to/your/projectFolder"
   },
   "dtsRollup": {
     "enabled": true,
-    "untrimmedFilePath": "<projectFolder>/reporter/<unscopedPackageName>.d.ts",
-    "alphaTrimmedFilePath": "<projectFolder>/reporter/<unscopedPackageName>-alpha.d.ts",
-    "betaTrimmedFilePath": "<projectFolder>/reporter/<unscopedPackageName>-beta.d.ts",
-    "publicTrimmedFilePath": "<projectFolder>/reporter/<unscopedPackageName>-public.d.ts"
+    "untrimmedFilePath": "<projectFolder>/.tbdocs/reporter/<unscopedPackageName>.d.ts",
+    "alphaTrimmedFilePath": "<projectFolder>/.tbdocs/reporter/<unscopedPackageName>-alpha.d.ts",
+    "betaTrimmedFilePath": "<projectFolder>/.tbdocs/reporter/<unscopedPackageName>-beta.d.ts",
+    "publicTrimmedFilePath": "<projectFolder>/.tbdocs/reporter/<unscopedPackageName>-public.d.ts"
     // "omitTrimmingComments": true
   },
 
   "tsdocMetadata": {
     "enabled": true,
-    "tsdocMetadataFilePath": "<projectFolder>/reporter/tsdoc-metadata.json"
+    "tsdocMetadataFilePath": "<projectFolder>/.tbdocs/reporter/tsdoc-metadata.json"
   },
 
   "messages": {
