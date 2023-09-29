@@ -31,8 +31,7 @@ inputs:
   # generator params
   docs_generator:
     description: 'Name of the docs generator tool (skips docs generation if empty)'
-    required: true
-    default: 'typedoc-markdown'
+    required: false
 
   # if you want to open a PR with the generated docs
   docs_target_owner_repo:

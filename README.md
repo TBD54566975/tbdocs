@@ -97,7 +97,7 @@ config also for merges against the `main` branch.
 
 ### GH Action Inputs Parameters
 
-Copied form the GH Action definition on [action.yml](./action.yml):
+Copied from the GH Action definition on [action.yml](./action.yml):
 
 ```yml
 inputs:
@@ -129,8 +129,7 @@ inputs:
   # generator params
   docs_generator:
     description: 'Name of the docs generator tool (skips docs generation if empty)'
-    required: true
-    default: 'typedoc-markdown'
+    required: false
 
   # if you want to open a PR with the generated docs
   docs_target_owner_repo:
@@ -150,6 +149,11 @@ inputs:
     default: 'docs'
 ```
 
+#### Allowed `docs_reporter` and `docs_generator` combinations values
+
+- **Typescript:**
+   - docs_reporter: `api-extractor`
+   - docs_generator: `typedoc-markdown`
 
 ## Initial Setup
 

@@ -16,7 +16,7 @@ export const commentReportSummary = async (
   const reportHasIssues = report.errorsCount > 0 || report.warningsCount > 0
   const commentBody = generateCommentBody(report, reportHasIssues)
   console.info(`>>> Report comment`, commentBody)
-  pushComment(commentBody, reportHasIssues)
+  await pushComment(commentBody)
 }
 
 const generateCommentBody = (
@@ -91,10 +91,7 @@ const getMessageLog = (
   return `| ${flag} \`${message.category}:${message.messageId}\`: ${message.text} ${link} |`
 }
 
-const pushComment = async (
-  commentBody: string,
-  reportHasIssues: boolean
-): Promise<void> => {
+const pushComment = async (commentBody: string): Promise<void> => {
   if (!configInputs.token) {
     console.info('>>> Skipping pushing comment. Missing token...')
     return
@@ -115,7 +112,6 @@ const pushComment = async (
     const comment = await createOrUpdateComment(
       octokit,
       githubContext,
-      reportHasIssues,
       commentBody
     )
 
@@ -130,7 +126,6 @@ const pushComment = async (
 const createOrUpdateComment = async (
   octokit: ReturnType<typeof github.getOctokit>,
   { owner, repo, issueNumber }: GithubContextData,
-  reportHasIssues: boolean,
   commentBody: string
 ): Promise<{ data: { url: string } } | undefined> => {
   // check if the comment exist
@@ -156,8 +151,7 @@ const createOrUpdateComment = async (
       comment_id: existingComment.id,
       body: commentBody
     })
-    // only create a brand new comment if there are issues
-  } else if (reportHasIssues) {
+  } else {
     console.info(`>>> Creating a brand new comment for the report`)
     return octokit.rest.issues.createComment({
       owner,
@@ -165,7 +159,5 @@ const createOrUpdateComment = async (
       issue_number: issueNumber,
       body: commentBody
     })
-  } else {
-    console.info(`>>> Skipping comment. No issues found.`)
   }
 }
