@@ -104,25 +104,24 @@ const openPr = async (): Promise<void> => {
     targetRepoPath
   )
 
-  await createOrUpdatePr(
+  const pr = await createOrUpdatePr(
     octokit,
     targetOwner,
     targetRepo,
     targetBranch,
     targetBase
   )
+
+  console.info(`>>> PR created/updated successfully!`, pr.data.comments_url)
 }
 
-/**
- * Check if the branch exists, if not create it
- */
 const createBranch = async (
   octokit: ReturnType<typeof github.getOctokit>,
   targetOwner: string,
   targetRepo: string,
   targetBranch: string,
   targetBase: string
-) => {
+): Promise<void> => {
   console.info(`>>> Checking if branch ${targetBranch} exists...`)
 
   try {
@@ -161,6 +160,7 @@ const createBranch = async (
     // wait a bit for the branch to be created and properly propagated
     // otherwise our commit will fail
     await wait(15_000)
+    console.info(`>>> Branch ${targetBranch} created successfully!`)
   }
 }
 
@@ -170,7 +170,7 @@ const pushDocsToBranch = async (
   targetRepo: string,
   targetBranch: string,
   targetRepoPath: string
-) => {
+): Promise<void> => {
   const files = readdirSync(GENERATED_DOCS_DIR, {
     recursive: true,
     withFileTypes: true
@@ -194,8 +194,8 @@ const pushDocsToBranch = async (
 
         return {
           path: path.join(targetRepoPath, fileSubpath),
-          mode: '100644' as '100644',
-          type: 'blob' as 'blob',
+          mode: '100644' as const,
+          type: 'blob' as const,
           sha: blobData.data.sha
         }
       })
@@ -263,7 +263,7 @@ const createOrUpdatePr = async (
   targetRepo: string,
   targetBranch: string,
   targetBase: string
-) => {
+): Promise<{ data: { comments_url: string } }> => {
   // check if PR exists
   const { data: pulls } = await octokit.rest.pulls.list({
     owner: targetOwner,
