@@ -44,6 +44,44 @@ flowchart TD
 - docs-generator:
   [typedoc-plugin-markdown](https://github.com/tgreyuk/typedoc-plugin-markdown)
 
+## GH Action Setup
+
+See a few examples of how to include the tbdocs GH Action on your pipeline.
+
+### Running the docs-reporter on CI checks
+
+This is generally used for PRs against main, it will generate a report with all the docs warnings and errors that the reporter found in a comment on your PR.
+
+```yml
+  # after your build step
+  - name: TBDocs Reporter
+    id: tbdocs-reporter-protocol
+    uses: TBD54566975/tbdocs@main
+    with:
+      token: ${{ secrets.GITHUB_TOKEN }}
+      project_path: './packages/protocol'
+      docs_reporter: 'api-extractor'
+      fail_on_error: false # change to true if you want to block on doc errors
+```
+
+### Running the docs-reporter + docs-generator on Release PRs
+
+```yml
+  # after your build step
+  - name: TBDocs Reporter
+    uses: TBD54566975/tbdocs@main
+    with:
+      token: ${{ secrets.GITHUB_TOKEN }}
+      project_path: './packages/protocol'
+      docs_reporter: 'api-extractor'
+      docs_generator: 'typedoc-markdown'
+      docs_target_owner_repo: 'TBD54566975/developer.tbd.website'
+      docs_target_branch: 'tbdocs_tbdex-js_protocol_release-pr-${{  }}'
+      fail_on_error: true # you probably want to block releases with errors
+
+```
+
+
 ## Initial Setup
 
 After you've cloned the repository to your local machine or codespace, you'll
