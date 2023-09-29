@@ -4,7 +4,7 @@
 ![CI](https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg)
 
 Tool for automating docs generation from source codes docs annotations (like
-TSDocs, JavaDocs, JsDocs etc.) to SSR websites that supports markdown (like
+TSDocs, JavaDocs, JsDocs etc.) to SSG websites that supports markdown (like
 Docusaurus, Hugo, Jekyll etc.).
 
 We are in the MVP phase testing **TSDocs -> Docusaurus only**.
@@ -27,14 +27,12 @@ flowchart TD
   PR --> DR[docs-report]
 ```
 
-**Cutting new Releases with Release PR + Auto SSR Preview:**
+**Cutting new Releases Automated Docs generated to target Docs repo:**
 
 ```mermaid
 flowchart TD
   B[New Release] --> DG[docs-generator]
-  DG --> PRR[Release PR]
-  DG --> SSR[Auto-generated MDs to SSR PR]
-  PRR --> DR2[docs-report]
+  DG --> SSG[New PR with auto-generated md docs]
 ```
 
 ### Supported Pipelines
@@ -97,12 +95,26 @@ node scripts/main.js
 ```sh
 docker build -f Dockerfile . --tag tbdocs-app:latest
 
-# now from the repo you want to analyze
+# now from the repo you want to analyze & generate docs
 docker run -v $(pwd):/github/workspace/ \
    --workdir /github/workspace          \
    -e "GITHUB_REPOSITORY=org/repo"      \
    -e "INPUT_PROJECT_PATH=."            \
+   -e "INPUT_DOCS_REPORT=api-extractor" \
    -e "INPUT_DOCS_GENERATOR=typedoc-markdown" \
+   tbdocs-app
+
+# to test opening a PR with the generated docs
+docker run -v $(pwd):/github/workspace/ \
+   --workdir /github/workspace          \
+   -e "GITHUB_REPOSITORY=TBD54566975/tbdex-js" \
+   -e "INPUT_PROJECT_PATH=packages/protocol"   \
+   -e "INPUT_DOCS_GENERATOR=typedoc-markdown"  \
+   -e "INPUT_DOCS_TARGET_OWNER_REPO=TBD54566975/developer.tbd.website" \
+   -e "INPUT_DOCS_TARGET_BRANCH=tbdocs_tbdex-js_protocol_v0.1.2" \
+   -e "INPUT_DOCS_TARGET_PR_BASE_BRANCH=main" \
+   -e "INPUT_DOCS_TARGET_REPO_PATH=site/docs/tbdex-js/api-reference/protocol" \
+   -e "INPUT_TOKEN=<gh-token>" \
    tbdocs-app
 ```
 
