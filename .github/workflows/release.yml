@@ -1,0 +1,54 @@
+name: Publish Docs
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version'
+        required: true
+        default: '0.0.0'
+
+# Allow only one concurrent deployment, but do NOT cancel in-progress runs as
+# we want to allow these release deployments to complete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish-docs:
+    name: Publish Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install Dependencies
+        id: npm-ci
+        run: npm ci
+
+      - name: Build
+        id: npm-build
+        run: npm run bundle
+
+      - name: TBDocs Reporter
+        id: tbdocs-reporter
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docs_reporter: api-extractor
+          fail_on_error: true
+          fail_on_warnings: true
+          docs_generator: 'typedoc-markdown'
+          docs_target_owner_repo: 'TBD54566975/developer.tbd.website'
+          docs_target_branch: 'tbdocs_release-${{ github.event.release ? github.event.release.tag_name : github.event.inputs.release_version }}'
+          docs_target_pr_base_branch: 'main'
+          docs_target_repo_path: 'site/docs/misc/tbdocs'
