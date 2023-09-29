@@ -2,6 +2,9 @@
 export type DocsReporterType = 'api-extractor'
 
 /** @beta */
+export type DocsGeneratorType = 'typedoc-markdown'
+
+/** @beta */
 export interface DocsReport {
   reporter: DocsReporterType
   errorsCount: number

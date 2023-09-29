@@ -6,67 +6,70 @@
  * variables following the pattern `INPUT_<INPUT_NAME>`.
  */
 
-import * as run from '../src/run'
-import * as docsReport from '../src/docs-report'
-
-jest.mock('@actions/core')
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-commonjs, @typescript-eslint/no-require-imports
-const core = require('@actions/core')
-
-const runDocsReportMock = jest.spyOn(docsReport, 'runDocsReport')
-const runMock = jest.spyOn(run, 'run')
-
-// mock @actions/github with jest
-jest.mock('@actions/github', () => ({
-  context: {
-    repo: {
-      owner: 'mocked-owner',
-      repo: 'mocked-repo'
-    },
-    issue: {
-      number: 1
-    },
-    sha: 'abcd1234efgh5678'
-  },
-  getOctokit: jest.fn().mockImplementation(() => {
-    return {
-      rest: {
-        issues: {
-          createComment: jest.fn().mockResolvedValue({
-            data: {
-              id: 12345,
-              url: `https://github.com/mocked-owner/mocked-repo/issues/1#issuecomment-12345`
-            }
-          })
-        }
-      }
-    }
-  })
+// Mocking the imported modules and values
+jest.mock('@actions/core', () => ({
+  debug: jest.fn(),
+  setFailed: jest.fn()
 }))
 
-describe('action', () => {
-  beforeEach(() => {
+jest.mock('../src/config', () => ({
+  configInputs: {
+    docsReport: false,
+    docsGenerator: false
+  }
+}))
+
+jest.mock('../src/docs-report', () => ({
+  runDocsReport: jest.fn()
+}))
+
+jest.mock('../src/docs-generator', () => ({
+  generateDocs: jest.fn()
+}))
+
+import * as core from '@actions/core'
+import { configInputs } from '../src/config'
+import { runDocsReport } from '../src/docs-report'
+import { run } from '../src/run'
+import { generateDocs } from '../src/docs-generator'
+
+describe('run function', () => {
+  afterEach(() => {
     jest.clearAllMocks()
   })
 
-  it('runs successfully', async () => {
-    await run.run()
-    expect(runMock).toHaveReturned()
-    expect(runDocsReportMock).toHaveBeenCalledTimes(1)
-    expect(core.debug).toHaveBeenCalledTimes(1)
-    expect(core.setFailed).toHaveBeenCalledTimes(0)
+  it('should execute runDocsReport', async () => {
+    configInputs.docsReport = 'api-extractor'
+
+    await run()
+
+    expect(core.debug).toHaveBeenCalledWith(
+      'Executing docs report api-extractor ...'
+    )
+    expect(runDocsReport).toHaveBeenCalledTimes(1)
   })
 
-  it('sets a failed status', async () => {
-    runDocsReportMock.mockImplementation(() => {
-      throw new Error('failed')
+  it('should execute docsGenerator', async () => {
+    configInputs.docsGenerator = 'typedoc-markdown'
+
+    await run()
+
+    expect(core.debug).toHaveBeenCalledWith(
+      'Executing docs generator typedoc-markdown ...'
+    )
+    expect(generateDocs).toHaveBeenCalledTimes(1)
+  })
+
+  it('should call core.setFailed on error', async () => {
+    const runDocsReportMock = runDocsReport as jest.Mock
+    runDocsReportMock.mockImplementationOnce(() => {
+      throw new Error('Mocked error')
     })
 
-    await run.run()
-    expect(runMock).toHaveReturned()
+    configInputs.docsReport = 'api-extractor'
 
-    // Verify that all of the core library functions were called correctly
-    expect(core.setFailed).toHaveBeenNthCalledWith(1, 'failed')
+    await run()
+
+    expect(core.setFailed).toHaveBeenCalledWith('Mocked error')
   })
 })

@@ -1,7 +1,7 @@
 import { setOutput, warning } from '@actions/core'
 
 import { commentReportSummary } from './comment-report'
-import { DocsReporterType, DocsReport } from '.'
+import { DocsReport } from '.'
 import { annotateCode } from './annotate-code'
 import { generateApiExtractorReport } from './api-extractor'
 import { configInputs } from '../config'
@@ -10,19 +10,17 @@ export * from './interfaces'
 
 /** @beta */
 export const runDocsReport = async (): Promise<void> => {
-  const report = await generateReport(configInputs.docsReport)
+  const report = await generateReport()
   await processReport(report)
   setReportResults(report)
 }
 
-const generateReport = async (
-  docsReport: DocsReporterType
-): Promise<DocsReport> => {
-  switch (docsReport) {
+const generateReport = async (): Promise<DocsReport> => {
+  switch (configInputs.docsReport) {
     case 'api-extractor':
       return generateApiExtractorReport()
     default:
-      throw new Error(`Unknown docs report: ${docsReport}`)
+      throw new Error(`Unknown docs report: ${configInputs.docsReport}`)
   }
 }
 
