@@ -3,7 +3,6 @@ name: Publish Docs
 on:
   release:
     types: [created]
-  pull_request:
   workflow_dispatch:
     inputs:
       release_version:
