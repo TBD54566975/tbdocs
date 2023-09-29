@@ -51,7 +51,8 @@ const generateTypedocMarkdown = async (): Promise<void> => {
     plugin: ['typedoc-plugin-markdown'],
     readme: 'none',
     entryDocument: 'index.md',
-    disableSources: true
+    disableSources: true,
+    githubPages: false
   })
 
   const projectReflection = await generatorApp.convert()
