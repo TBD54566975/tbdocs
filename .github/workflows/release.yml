@@ -3,12 +3,13 @@ name: Publish Docs
 on:
   release:
     types: [created]
+  pull_request:
   workflow_dispatch:
     inputs:
       release_version:
         description: 'Release version'
         required: true
-        default: '0.0.0'
+        default: 'v0.0.0'
 
 # Allow only one concurrent deployment, but do NOT cancel in-progress runs as
 # we want to allow these release deployments to complete.
