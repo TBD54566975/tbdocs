@@ -92,8 +92,10 @@ const getMessageLog = (
 }
 
 const pushComment = async (commentBody: string): Promise<void> => {
-  if (!configInputs.token) {
-    console.info('>>> Skipping pushing comment. Missing token...')
+  if (!configInputs.token && !configInputs.botAppId) {
+    console.info(
+      '>>> Skipping pushing comment. Missing credentials (token or botAppId)...'
+    )
     return
   }
 
