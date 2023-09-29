@@ -264,7 +264,6 @@ const createOrUpdatePr = async (
   targetBranch: string,
   targetBase: string
 ): Promise<{ data: { comments_url: string } }> => {
-  // check if PR exists
   const { data: pulls } = await octokit.rest.pulls.list({
     owner: targetOwner,
     repo: targetRepo,
@@ -282,8 +281,9 @@ const createOrUpdatePr = async (
     `\n\n` +
     `Project source path: **${configInputs.projectPath}**` +
     `\n\n` +
-    `**Please do not touch this PR, it will be updated automatically by the tbdocs pipeline.
-    Instead, update the docs in the source code.**`
+    `**Please use this PR for previewing and reviewing purposes only.\n` +
+    `DO NOT TOUCH this PR, since it will be updated automatically by the tbdocs pipeline.\n` +
+    `Instead, update the docs in the source code.**`
 
   const footer =
     `Updated @ ${new Date().toISOString()} from ` +
