@@ -147,6 +147,19 @@ inputs:
     description: 'Target repo directory to insert the generated docs'
     required: false
     default: 'docs'
+
+  # to allow opening PRs across different repos we need an authorized bot app
+  # you could also use a user PAT in the above token field, but the generated 
+  # comments/PRs will be owned by the user
+  bot_app_id:
+    description: 'Bot app id'
+    required: false
+  bot_app_private_key:
+    description: 'Bot app private key (pem format)'
+    required: false
+  bot_app_installation_id:
+    description: 'Bot app installation id'
+    required: false
 ```
 
 #### Allowed `docs_reporter` and `docs_generator` combinations values
