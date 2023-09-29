@@ -14,7 +14,7 @@ jest.mock('@actions/core', () => ({
 
 jest.mock('../src/config', () => ({
   configInputs: {
-    docsReport: false,
+    docsReporter: false,
     docsGenerator: false
   }
 }))
@@ -39,12 +39,12 @@ describe('run function', () => {
   })
 
   it('should execute runDocsReport', async () => {
-    configInputs.docsReport = 'api-extractor'
+    configInputs.docsReporter = 'api-extractor'
 
     await run()
 
     expect(core.debug).toHaveBeenCalledWith(
-      'Executing docs report api-extractor ...'
+      'Executing docs reporter api-extractor ...'
     )
     expect(runDocsReport).toHaveBeenCalledTimes(1)
   })
@@ -66,7 +66,7 @@ describe('run function', () => {
       throw new Error('Mocked error')
     })
 
-    configInputs.docsReport = 'api-extractor'
+    configInputs.docsReporter = 'api-extractor'
 
     await run()
 

@@ -11,8 +11,8 @@ import { generateDocs } from './docs-generator'
  */
 export async function run(): Promise<void> {
   try {
-    if (configInputs.docsReport) {
-      core.debug(`Executing docs report ${configInputs.docsReport} ...`)
+    if (configInputs.docsReporter) {
+      core.debug(`Executing docs reporter ${configInputs.docsReporter} ...`)
       await runDocsReport()
     }
 

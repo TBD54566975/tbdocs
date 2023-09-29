@@ -15,6 +15,7 @@ declare module 'typedoc' {
 
 const GENERATED_DOCS_DIR = path.join(configInputs.projectPath, '.tbdocs/docs')
 
+/** @beta */
 export const generateDocs = async (): Promise<void> => {
   switch (configInputs.docsGenerator) {
     case 'typedoc-markdown':
@@ -24,7 +25,7 @@ export const generateDocs = async (): Promise<void> => {
       throw new Error(`Unknown docs generator: ${configInputs.docsGenerator}`)
   }
 
-  if (configInputs.docsTargetOwnerRepo && configInputs.docsTargetBranch) {
+  if (configInputs.docsTargetOwnerRepo) {
     await openPr()
   }
 }

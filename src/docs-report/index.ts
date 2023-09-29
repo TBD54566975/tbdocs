@@ -16,11 +16,11 @@ export const runDocsReport = async (): Promise<void> => {
 }
 
 const generateReport = async (): Promise<DocsReport> => {
-  switch (configInputs.docsReport) {
+  switch (configInputs.docsReporter) {
     case 'api-extractor':
       return generateApiExtractorReport()
     default:
-      throw new Error(`Unknown docs report: ${configInputs.docsReport}`)
+      throw new Error(`Unknown docs report: ${configInputs.docsReporter}`)
   }
 }
 
@@ -37,9 +37,14 @@ const setReportResults = (report: DocsReport): void => {
     if (configInputs.failOnError) {
       throw new Error(errorMessage)
     }
-  } else if (report.warningsCount > 0) {
+  }
+
+  if (report.warningsCount > 0) {
     const warningMessage = `Docs report ${report.reporter} completed with ${report.warningsCount} warnings.`
     warning(warningMessage)
+    if (configInputs.failOnWarnings) {
+      throw new Error(warningMessage)
+    }
   }
 
   // Set outputs for other workflow steps to use
