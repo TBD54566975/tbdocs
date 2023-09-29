@@ -50,37 +50,49 @@ See a few examples of how to include the tbdocs GH Action on your pipeline.
 
 ### Running the docs-reporter on CI checks
 
-This is generally used for PRs against main, it will generate a report with all the docs warnings and errors that the reporter found in a comment on your PR.
+This is generally used for PRs against main, it will generate a report with all
+the docs warnings and errors that the reporter found in a comment on your PR.
 
 ```yml
-  # after your build step
-  - name: TBDocs Reporter
-    id: tbdocs-reporter-protocol
-    uses: TBD54566975/tbdocs@main
-    with:
-      token: ${{ secrets.GITHUB_TOKEN }}
-      project_path: './packages/protocol'
-      docs_reporter: 'api-extractor'
-      fail_on_error: false # change to true if you want to block on doc errors
+# after ts build step
+- name: TBDocs Reporter
+  id: tbdocs-reporter-protocol
+  uses: TBD54566975/tbdocs@main
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    project_path: './packages/protocol'
+    docs_reporter: 'api-extractor'
+    fail_on_error: false # change to true if you want to block on doc errors
 ```
 
 ### Running the docs-reporter + docs-generator on Release PRs
 
-```yml
-  # after your build step
-  - name: TBDocs Reporter
-    uses: TBD54566975/tbdocs@main
-    with:
-      token: ${{ secrets.GITHUB_TOKEN }}
-      project_path: './packages/protocol'
-      docs_reporter: 'api-extractor'
-      docs_generator: 'typedoc-markdown'
-      docs_target_owner_repo: 'TBD54566975/developer.tbd.website'
-      docs_target_branch: 'tbdocs_tbdex-js_protocol_release-pr-${{  }}'
-      fail_on_error: true # you probably want to block releases with errors
+This will run the doc-reporter as above but it will also run the markdown docs
+generator and open a PR against the target repo (the SSG website which knows how
+to render Markdown, think docusaurus, hugo etc.).
 
+You will want to do this only on Release PRs, so that the docs are being
+published when new versions of the APIs are being released to the public.
+
+```yml
+# after ts build step
+- name: TBDocs Reporter
+  uses: TBD54566975/tbdocs@main
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    project_path: './packages/protocol'
+    docs_reporter: 'api-extractor'
+    docs_generator: 'typedoc-markdown'
+    docs_target_owner_repo: 'TBD54566975/developer.tbd.website'
+    docs_target_branch:
+      'tbdocs_tbdex-js_protocol_release-pr-${{ github.event.number }}'
+    docs_target_pr_base_branch: 'main'
+    docs_target_repo_path: 'site/docs/tbdex-js/api-reference/protocol'
+    fail_on_error: true # you probably want to block releases with errors
 ```
 
+PS: if you like to expose the docs of unstable/next versions you could put this
+config also for merges against the `main` branch.
 
 ## Initial Setup
 
