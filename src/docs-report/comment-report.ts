@@ -1,8 +1,8 @@
-import * as github from '@actions/github'
+import { Octokit } from '@octokit/rest'
 
 import { DocsReport, ReportMessage } from '.'
 import { configInputs } from '../config'
-import { GithubContextData, getGithubContext } from '../utils'
+import { GithubContextData, getGithubContext, getOctokit } from '../utils'
 
 const REPORT_HEADER_PREFIX = `**TBDocs Report**`
 const MISC_MESSAGES_GROUP = '_misc_group'
@@ -92,12 +92,14 @@ const getMessageLog = (
 }
 
 const pushComment = async (commentBody: string): Promise<void> => {
-  if (!configInputs.token) {
-    console.info('>>> Skipping pushing comment. Missing token...')
+  if (!configInputs.token && !configInputs.botAppId) {
+    console.info(
+      '>>> Skipping pushing comment. Missing credentials (token or botAppId)...'
+    )
     return
   }
 
-  const octokit = github.getOctokit(configInputs.token)
+  const octokit = getOctokit()
 
   const { owner, repo, issueNumber, actor } = githubContext
   console.info('>>> Pushing comment to', {
@@ -124,7 +126,7 @@ const pushComment = async (commentBody: string): Promise<void> => {
 }
 
 const createOrUpdateComment = async (
-  octokit: ReturnType<typeof github.getOctokit>,
+  octokit: Octokit,
   { owner, repo, issueNumber }: GithubContextData,
   commentBody: string
 ): Promise<{ data: { url: string } } | undefined> => {

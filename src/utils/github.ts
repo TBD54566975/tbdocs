@@ -1,4 +1,8 @@
 import * as github from '@actions/github'
+import { createAppAuth } from '@octokit/auth-app'
+import { Octokit } from '@octokit/rest'
+
+import { configInputs } from '../config'
 
 export interface GithubContextData {
   owner: string
@@ -42,5 +46,25 @@ export const getGithubContext = (): GithubContextData => {
     issueNumber: issue.number,
     blobBaseUrl,
     commitUrl
+  }
+}
+
+export const getOctokit = (): Octokit => {
+  if (configInputs.botAppId) {
+    const { botAppId, botAppPrivateKey, botAppInstallationId } = configInputs
+    return new Octokit({
+      authStrategy: createAppAuth,
+      auth: {
+        appId: botAppId,
+        privateKey: botAppPrivateKey,
+        installationId: botAppInstallationId
+      }
+    })
+  } else if (configInputs.token) {
+    return github.getOctokit(configInputs.token) as unknown as Octokit
+  } else {
+    throw new Error(
+      'Unable to get octokit instance. Missing token or bot app config'
+    )
   }
 }

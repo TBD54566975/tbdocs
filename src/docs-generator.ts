@@ -2,9 +2,10 @@ import { Application } from 'typedoc'
 import path from 'path'
 import { existsSync, readFileSync, readdirSync } from 'fs'
 import * as github from '@actions/github'
+import { Octokit } from '@octokit/rest'
 
 import { configInputs } from './config'
-import { wait } from './utils'
+import { getOctokit, wait } from './utils'
 
 // Required for the typedoc-plugin-markdown plugin
 declare module 'typedoc' {
@@ -70,7 +71,7 @@ const generateTypedocMarkdown = async (): Promise<void> => {
 const openPr = async (): Promise<void> => {
   console.log('>>> Opening PR...')
 
-  const octokit = github.getOctokit(configInputs.token)
+  const octokit = getOctokit()
   const [targetOwner, targetRepo] = configInputs.docsTargetOwnerRepo.split('/')
   const targetBranch = configInputs.docsTargetBranch
   const targetBase = configInputs.docsTargetPrBaseBranch
@@ -117,7 +118,7 @@ const openPr = async (): Promise<void> => {
 }
 
 const createBranch = async (
-  octokit: ReturnType<typeof github.getOctokit>,
+  octokit: Octokit,
   targetOwner: string,
   targetRepo: string,
   targetBranch: string,
@@ -166,7 +167,7 @@ const createBranch = async (
 }
 
 const pushDocsToBranch = async (
-  octokit: ReturnType<typeof github.getOctokit>,
+  octokit: Octokit,
   targetOwner: string,
   targetRepo: string,
   targetBranch: string,
@@ -259,7 +260,7 @@ const pushDocsToBranch = async (
 }
 
 const createOrUpdatePr = async (
-  octokit: ReturnType<typeof github.getOctokit>,
+  octokit: Octokit,
   targetOwner: string,
   targetRepo: string,
   targetBranch: string,
