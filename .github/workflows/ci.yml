@@ -50,6 +50,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           docs_reporter: api-extractor
+          fail_on_error: true
+          fail_on_warning: true
 
       - name: Save Artifacts
         uses: actions/upload-artifact@v3
