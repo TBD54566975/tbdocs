@@ -24,7 +24,7 @@ export const generateDocs = async (): Promise<void> => {
       throw new Error(`Unknown docs generator: ${configInputs.docsGenerator}`)
   }
 
-  if (configInputs.docsTargetOwnerRepo && configInputs.docsTargetBranch) {
+  if (configInputs.docsTargetOwnerRepo) {
     await openPr()
   }
 }

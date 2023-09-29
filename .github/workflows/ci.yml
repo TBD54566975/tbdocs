@@ -49,6 +49,7 @@ jobs:
         uses: ./
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          docs_reporter: api-extractor
 
       - name: Save Artifacts
         uses: actions/upload-artifact@v3

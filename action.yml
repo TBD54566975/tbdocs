@@ -3,25 +3,53 @@ description: 'Provide a description here'
 author: 'TBD54566975'
 
 inputs:
-  docs_report:
-    description: 'What is the docs report tool?'
-    required: true
-    default: 'api-extractor'
+  token:
+    description: 'Token used to submit comments summary and open PRs'
+    required: false
   project_path:
     description: 'Path to the project root'
     required: false
     default: '.'
-  token:
-    description: 'Token used to submit comments summary and open PRs'
+
+  # reporter params
+  docs_reporter:
+    description: 'Name of the docs reporter tool (skips report if empty)'
     required: false
   fail_on_error:
-    description: 'Should it fail on error?'
+    description: 'Should it fail on report errors?'
+    required: false
+    default: 'true'
+  fail_on_warnings:
+    description: 'Should it fail on report warnings?'
     required: false
     default: 'false'
   api_extractor_json_path:
-    description: 'Path to the api-extractor.json file'
+    description: 'Path to the api-extractor.json file (if you need customization)'
     required: false
     default: ''
+
+  # generator params
+  docs_generator:
+    description: 'Name of the docs generator tool (skips docs generation if empty)'
+    required: true
+    default: 'typedoc-markdown'
+
+  # if you want to open a PR with the generated docs
+  docs_target_owner_repo:
+    description: 'Target owner/repo for the generated docs PR (skips opening a PR if empty)'
+    required: false
+  docs_target_branch:
+    description: 'Target branch for the generated docs PR'
+    required: false
+    default: 'main'
+  docs_target_pr_base_branch:
+    description: 'Target base branch for the generated docs PR'
+    required: false
+    default: 'main'
+  docs_target_repo_path:
+    description: 'Target repo directory to insert the generated docs'
+    required: false
+    default: 'docs'
 
 outputs:
   report:
