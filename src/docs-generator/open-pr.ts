@@ -1,74 +1,15 @@
-import { Application } from 'typedoc'
 import path from 'path'
-import { existsSync, readFileSync, readdirSync } from 'fs'
+import { readFileSync, readdirSync } from 'fs'
 import * as github from '@actions/github'
 import { Octokit } from '@octokit/rest'
 
-import { configInputs } from './config'
-import { getOctokit, wait } from './utils'
-
-// Required for the typedoc-plugin-markdown plugin
-declare module 'typedoc' {
-  export interface TypeDocOptionMap {
-    entryDocument: string
-  }
-}
-
-const GENERATED_DOCS_DIR = path.join(configInputs.projectPath, '.tbdocs/docs')
-
-/** @beta */
-export const generateDocs = async (): Promise<void> => {
-  switch (configInputs.docsGenerator) {
-    case 'typedoc-markdown':
-      await generateTypedocMarkdown()
-      break
-    default:
-      throw new Error(`Unknown docs generator: ${configInputs.docsGenerator}`)
-  }
-
-  if (configInputs.docsTargetOwnerRepo) {
-    await openPr()
-  }
-}
-
-const generateTypedocMarkdown = async (): Promise<void> => {
-  console.log('>>> Generating docs...')
-
-  // TODO: improve this entry point search logic and allow it to be configurable too
-  let entryPoint = path.join(configInputs.projectPath, 'src/index.ts')
-  if (!existsSync(entryPoint)) {
-    entryPoint = path.join(configInputs.projectPath, 'index.ts')
-  }
-  if (!existsSync(entryPoint)) {
-    entryPoint = path.join(configInputs.projectPath, 'src/main.ts')
-  }
-  if (!existsSync(entryPoint)) {
-    entryPoint = path.join(configInputs.projectPath, 'main.ts')
-  }
-
-  console.log('>>> Typedoc Generator entryPoint', entryPoint)
-  const generatorApp = await Application.bootstrapWithPlugins({
-    entryPoints: [entryPoint],
-    skipErrorChecking: true,
-    plugin: ['typedoc-plugin-markdown'],
-    readme: 'none',
-    entryDocument: 'index.md',
-    disableSources: true,
-    githubPages: false
-  })
-
-  const projectReflection = await generatorApp.convert()
-  if (!projectReflection) {
-    throw new Error('Failed to generate docs')
-  }
-
-  await generatorApp.generateDocs(projectReflection, GENERATED_DOCS_DIR)
-}
+import { getOctokit, wait } from '../utils'
+import { configInputs } from '../config'
 
 /**
  * Open a PR to Github with the generated docs
  */
-const openPr = async (): Promise<void> => {
+export const openPr = async (): Promise<void> => {
   console.log('>>> Opening PR...')
 
   const octokit = getOctokit()
@@ -173,7 +114,7 @@ const pushDocsToBranch = async (
   targetBranch: string,
   targetRepoPath: string
 ): Promise<void> => {
-  const files = readdirSync(GENERATED_DOCS_DIR, {
+  const files = readdirSync(configInputs.docsDir, {
     recursive: true,
     withFileTypes: true
   })
@@ -192,7 +133,7 @@ const pushDocsToBranch = async (
           encoding: 'base64'
         })
 
-        const fileSubpath = filePath.split(GENERATED_DOCS_DIR)[1]
+        const fileSubpath = filePath.split(configInputs.docsDir)[1]
 
         return {
           path: path.join(targetRepoPath, fileSubpath),

@@ -1,8 +1,13 @@
 import { getInput } from '@actions/core'
-import { DocsReporterType, DocsGeneratorType } from './docs-report'
+import path from 'path'
+
+import { DocsReporterType } from './docs-report'
+import { DocsGeneratorType } from './docs-generator'
+
+const projectPath = getInput('project_path') || '.'
 
 export const configInputs = {
-  projectPath: getInput('project_path') || '.',
+  projectPath,
   token: getInput('token'),
 
   docsReporter: (getInput('docs_reporter') || '') as DocsReporterType,
@@ -13,6 +18,7 @@ export const configInputs = {
   },
 
   docsGenerator: (getInput('docs_generator') || '') as DocsGeneratorType,
+  docsDir: path.join(projectPath, '.tbdocs/docs'),
   docsTargetOwnerRepo: getInput('docs_target_owner_repo'),
   docsTargetBranch: getInput('docs_target_branch'),
   docsTargetPrBaseBranch: getInput('docs_target_pr_base_branch'),
