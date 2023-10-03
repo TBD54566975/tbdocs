@@ -1,5 +1,5 @@
 import path from 'path'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { Application } from 'typedoc'
 
 import { configInputs } from '../config'
@@ -8,8 +8,13 @@ import { configInputs } from '../config'
 declare module 'typedoc' {
   export interface TypeDocOptionMap {
     entryDocument: string
+    hidePageTitle: boolean
+    hideBreadcrumbs: boolean
+    hideInPageTOC: boolean
   }
 }
+
+const ENTRY_DOCUMENT = 'index.md'
 
 export const generateTypedocMarkdown = async (): Promise<void> => {
   console.log('>>> Generating docs...')
@@ -32,8 +37,11 @@ export const generateTypedocMarkdown = async (): Promise<void> => {
     skipErrorChecking: true,
     plugin: ['typedoc-plugin-markdown'],
     readme: 'none',
-    entryDocument: 'index.md',
+    entryDocument: ENTRY_DOCUMENT,
     disableSources: true,
+    hidePageTitle: true,
+    hideBreadcrumbs: true,
+    hideInPageTOC: true,
     githubPages: false
   })
 
@@ -43,4 +51,14 @@ export const generateTypedocMarkdown = async (): Promise<void> => {
   }
 
   await generatorApp.generateDocs(projectReflection, configInputs.docsDir)
+
+  addTitleToIndexFile(projectReflection.packageName)
+}
+
+const addTitleToIndexFile = (packageName = 'API Reference'): void => {
+  const indexMdPath = path.join(configInputs.docsDir, ENTRY_DOCUMENT)
+  const indexFrontMatter = `---\ntitle: '${packageName}'\n---\n\n`
+  const indexMdContent = readFileSync(indexMdPath, 'utf8')
+  const updatedIndexMdContent = indexFrontMatter + indexMdContent
+  writeFileSync(indexMdPath, updatedIndexMdContent)
 }
