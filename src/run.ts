@@ -6,7 +6,7 @@ import { generateDocs } from './docs-generator'
 
 /**
  * The main function for the action.
- * @returns `Promise<void>` Resolves when the action is complete.
+ * @returns `Promise<void>` resolves when the action is complete.
  * @public
  */
 export async function run(): Promise<void> {
@@ -22,6 +22,7 @@ export async function run(): Promise<void> {
     }
   } catch (error) {
     // Fail the workflow run if an error occurs
+    console.error(error)
     if (error instanceof Error) core.setFailed(error.message)
   }
 }

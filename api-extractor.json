@@ -54,6 +54,9 @@
       "default": {
         "logLevel": "warning"
         // "addToApiReportFile": true
+      },
+      "ae-undocumented": {
+        "logLevel": "warning"
       }
     },
     "tsdocMessageReporting": {

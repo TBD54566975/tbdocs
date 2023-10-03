@@ -8,7 +8,12 @@ import { configInputs } from '../config'
 
 export * from './interfaces'
 
-/** @beta */
+/**
+ * Runs the docs reporter to extract any docs errors/mistakes and processes
+ * the results by annotating the code files and creating a PR comment.
+ *
+ * @beta
+ **/
 export const runDocsReport = async (): Promise<void> => {
   const report = await generateReport()
   await processReport(report)
