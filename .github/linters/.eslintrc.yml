@@ -83,6 +83,14 @@ rules:
     'import/no-unresolved': ['error', { 'ignore': ['typedoc'] }]
   }
 
+settings:
+  "import/resolver":
+    node:
+      extensions:
+        - '.js'
+        - '.ts'
+        - '.d.ts'
+
 overrides:
   - files: ['__tests__/**/*.ts']
     rules:

@@ -1,4 +1,5 @@
 import * as github from '@actions/github'
+import { PullRequestEvent } from '@octokit/webhooks-definitions/schema'
 import { createAppAuth } from '@octokit/auth-app'
 import { Octokit } from '@octokit/rest'
 
@@ -66,5 +67,14 @@ export const getOctokit = (): Octokit => {
     throw new Error(
       'Unable to get octokit instance. Missing token or bot app config'
     )
+  }
+}
+
+export type GitBaseInfo = PullRequestEvent['pull_request']['base']
+
+export const getBaseInfo = (): GitBaseInfo | undefined => {
+  if (github.context.eventName === 'pull_request') {
+    const event = github.context.payload as PullRequestEvent
+    return event.pull_request.base
   }
 }

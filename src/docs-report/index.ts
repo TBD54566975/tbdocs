@@ -5,6 +5,7 @@ import { DocsReport } from '.'
 import { annotateCode } from './annotate-code'
 import { generateApiExtractorReport } from './api-extractor'
 import { configInputs } from '../config'
+import { getFilesDiffs, isSourceInChangedScope } from '../utils'
 
 export * from './interfaces'
 
@@ -15,7 +16,8 @@ export * from './interfaces'
  * @beta
  **/
 export const runDocsReport = async (): Promise<void> => {
-  const report = await generateReport()
+  const rawReport = await generateReport()
+  const report = await filterReport(rawReport)
   await processReport(report)
   setReportResults(report)
 }
@@ -29,8 +31,43 @@ const generateReport = async (): Promise<DocsReport> => {
   }
 }
 
+const filterReport = async (rawReport: DocsReport): Promise<DocsReport> => {
+  if (configInputs.reportChangedScopeOnly) {
+    const filesDiffs = await getFilesDiffs()
+    const filteredMessages = rawReport.messages.filter(
+      message =>
+        !message.sourceFilePath ||
+        isSourceInChangedScope(
+          filesDiffs,
+          message.sourceFilePath,
+          message.sourceFileLine
+        )
+    )
+
+    // recompute errors and warnings count
+    let errorsCount = 0
+    let warningsCount = 0
+    for (const message of filteredMessages) {
+      if (message.level === 'error') {
+        errorsCount++
+      } else if (message.level === 'warning') {
+        warningsCount++
+      }
+    }
+
+    return {
+      ...rawReport,
+      errorsCount,
+      warningsCount,
+      messages: filteredMessages
+    }
+  } else {
+    return rawReport
+  }
+}
+
 const processReport = async (report: DocsReport): Promise<void> => {
-  console.info(`Report: ${JSON.stringify(report)}`)
+  console.info(`Report: ${JSON.stringify(report, undefined, 2)}`)
   annotateCode(report.messages)
   await commentReportSummary(report)
 }

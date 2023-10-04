@@ -15,6 +15,10 @@ inputs:
   docs_reporter:
     description: 'Name of the docs reporter tool (skips report if empty)'
     required: false
+  report_changed_scope_only:
+    description: 'Should it report only changed scope?'
+    required: false
+    default: 'false'
   fail_on_error:
     description: 'Should it fail on report errors?'
     required: false
