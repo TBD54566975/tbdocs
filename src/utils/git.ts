@@ -1,5 +1,6 @@
 import path from 'path'
 import { simpleGit } from 'simple-git'
+import { getBaseInfo } from '.'
 
 export interface GitDiffs {
   originalLine: number
@@ -12,18 +13,21 @@ export type FilesDiffsMap = Record<string, GitDiffs[]>
 
 const git = simpleGit()
 
-export const getFilesDiffs = async (
-  targetBranchOrSha: string
-): Promise<FilesDiffsMap> => {
-  // Since GH Actions checkout action doesn't fetch all the history, we need to do it manually
-  await fetchGitHistory(targetBranchOrSha)
+export const getFilesDiffs = async (): Promise<FilesDiffsMap> => {
+  const targetBase = getBaseInfo() || { ref: 'main', sha: undefined }
 
-  const diffSummary = await git.diffSummary(['-U0', targetBranchOrSha])
+  // Since GH Actions checkout action doesn't fetch all the history, we need to do it manually
+  await fetchGitHistory(targetBase.ref)
+  console.info(`Git history fetched ref '${targetBase.ref}' successfully!`)
+
+  const targetShaOrRef = targetBase.sha || targetBase.ref
+
+  const diffSummary = await git.diffSummary(['-U0', targetShaOrRef])
 
   const filesDiffsMap: FilesDiffsMap = {}
 
   for (const file of diffSummary.files) {
-    const fileDiffs = await git.diff(['-U0', targetBranchOrSha, file.file])
+    const fileDiffs = await git.diff(['-U0', targetShaOrRef, file.file])
 
     const changedLines: GitDiffs[] = fileDiffs
       .split('\n')
@@ -48,7 +52,7 @@ export const getFilesDiffs = async (
   }
 
   console.info(
-    `>>> Files diffs map comparing with ${targetBranchOrSha}`,
+    `>>> Files diffs map comparing with ${targetShaOrRef}`,
     filesDiffsMap
   )
   return filesDiffsMap
@@ -78,7 +82,7 @@ export const isSourceInChangedScope = (
   )
 }
 
-const fetchGitHistory = async (targetBranchOrSha: string): Promise<void> => {
+const fetchGitHistory = async (targetBranch: string): Promise<void> => {
   // needed for the docker container to work
   console.info(">>> Setting git config 'safe.directory' to '/github/workspace'")
 
@@ -97,6 +101,6 @@ const fetchGitHistory = async (targetBranchOrSha: string): Promise<void> => {
     'fetch',
     '--depth=1',
     'origin',
-    `+refs/heads/${targetBranchOrSha}:refs/remotes/origin/${targetBranchOrSha}`
+    `+refs/heads/${targetBranch}:refs/remotes/origin/${targetBranch}`
   ])
 }

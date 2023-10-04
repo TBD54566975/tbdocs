@@ -70,9 +70,11 @@ export const getOctokit = (): Octokit => {
   }
 }
 
-export const getBaseSha = (): string | undefined => {
+export type GitBaseInfo = PullRequestEvent['pull_request']['base']
+
+export const getBaseInfo = (): GitBaseInfo | undefined => {
   if (github.context.eventName === 'pull_request') {
     const event = github.context.payload as PullRequestEvent
-    return event.pull_request.base.sha
+    return event.pull_request.base
   }
 }

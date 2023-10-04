@@ -5,7 +5,7 @@ import { DocsReport } from '.'
 import { annotateCode } from './annotate-code'
 import { generateApiExtractorReport } from './api-extractor'
 import { configInputs } from '../config'
-import { getBaseSha, getFilesDiffs, isSourceInChangedScope } from '../utils'
+import { getFilesDiffs, isSourceInChangedScope } from '../utils'
 
 export * from './interfaces'
 
@@ -33,12 +33,7 @@ const generateReport = async (): Promise<DocsReport> => {
 
 const filterReport = async (rawReport: DocsReport): Promise<DocsReport> => {
   if (configInputs.reportChangedScopeOnly) {
-    let targetBase = getBaseSha()
-    if (!targetBase) {
-      console.warn("Fail to determine the base sha, fallback to 'main'")
-      targetBase = 'main'
-    }
-    const filesDiffs = await getFilesDiffs(targetBase)
+    const filesDiffs = await getFilesDiffs()
     const filteredMessages = rawReport.messages.filter(
       message =>
         !message.sourceFilePath ||
