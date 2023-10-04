@@ -74,6 +74,7 @@
     "@octokit/auth-app": "^6.0.1",
     "@octokit/rest": "^20.0.2",
     "fs": "^0.0.1-security",
+    "simple-git": "^3.20.0",
     "tsconfck": "^2.1.2",
     "typedoc": "^0.25.1",
     "typedoc-plugin-markdown": "^3.16.0"

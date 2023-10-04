@@ -1,4 +1,5 @@
 import { setOutput, warning } from '@actions/core'
+import simpleGit from 'simple-git'
 
 import { commentReportSummary } from './comment-report'
 import { DocsReport } from '.'
@@ -30,7 +31,11 @@ const generateReport = async (): Promise<DocsReport> => {
 }
 
 const processReport = async (report: DocsReport): Promise<void> => {
-  console.info(`Report: ${JSON.stringify(report)}`)
+  console.info(`Report: ${JSON.stringify(report, undefined, 2)}`)
+
+  const filesDiffs = await getFilesDiffs()
+  console.info(JSON.stringify(filesDiffs, undefined, 2))
+
   annotateCode(report.messages)
   await commentReportSummary(report)
 }
@@ -54,4 +59,47 @@ const setReportResults = (report: DocsReport): void => {
 
   // Set outputs for other workflow steps to use
   setOutput('report', JSON.stringify(report))
+}
+
+interface FileDiffs {
+  filePath: string
+  diffs: {
+    startLine: number
+    startOffset: number
+    endLine?: number
+    endOffset?: number
+  }[]
+}
+
+const git = simpleGit()
+
+const getFilesDiffs = async (): Promise<FileDiffs[]> => {
+  // using -U0 to get the minimal context in the diff
+  const diffSummary = await git.diffSummary(['-U0'])
+
+  const diffFilesWithLines: FileDiffs[] = []
+
+  for (const file of diffSummary.files) {
+    const fileDiffs = await git.diff(['-U0', file.file])
+
+    const changedLines = fileDiffs
+      .split('\n')
+      .filter(line => line.startsWith('@@'))
+      .map(line =>
+        (line.match(/@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@/) || [])
+          .filter(str => str && !isNaN(+str))
+          .map(Number)
+      )
+      .filter(diffNumbers => diffNumbers.length >= 3)
+      .map(([startLine, startOffset, endLine, endOffset]) => {
+        return { startLine, startOffset, endLine, endOffset }
+      })
+
+    diffFilesWithLines.push({
+      filePath: file.file,
+      diffs: changedLines
+    })
+  }
+
+  return diffFilesWithLines
 }
