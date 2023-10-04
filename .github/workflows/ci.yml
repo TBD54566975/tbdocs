@@ -49,6 +49,7 @@ jobs:
         uses: ./
         with:
           docs_reporter: api-extractor
+          report_changed_scope_only: true
           fail_on_error: true
           fail_on_warnings: true
           bot_app_id: ${{ secrets.BOT_APP_ID }}

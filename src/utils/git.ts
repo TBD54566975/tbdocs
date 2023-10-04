@@ -15,6 +15,9 @@ const git = simpleGit()
 export const getFilesDiffs = async (
   targetBranchOrSha: string
 ): Promise<FilesDiffsMap> => {
+  // Since GH Actions checkout action doesn't fetch all the history, we need to do it manually
+  await fetchGitHistory(targetBranchOrSha)
+
   const diffSummary = await git.diffSummary(['-U0', targetBranchOrSha])
 
   const filesDiffsMap: FilesDiffsMap = {}
@@ -58,11 +61,6 @@ export const isSourceInChangedScope = (
 ): boolean => {
   const changedLines = filesDiffs[sourceFilePath]
 
-  console.info(
-    `>>> Analyzing ${sourceFilePath} at line ${sourceFileLine}`,
-    changedLines
-  )
-
   // if file is not changed, ignore
   if (!changedLines) {
     return false
@@ -78,4 +76,27 @@ export const isSourceInChangedScope = (
       sourceFileLine >= updatedLine &&
       sourceFileLine <= updatedLine + (updatedOffset || 0)
   )
+}
+
+const fetchGitHistory = async (targetBranchOrSha: string): Promise<void> => {
+  // needed for the docker container to work
+  console.info(">>> Setting git config 'safe.directory' to '/github/workspace'")
+
+  await git.raw([
+    'config',
+    '--global',
+    '--add',
+    'safe.directory',
+    process.cwd()
+  ])
+
+  // fetching origin
+  console.info('>>> Fetching origin')
+
+  await git.raw([
+    'fetch',
+    '--depth=1',
+    'origin',
+    `+refs/heads/${targetBranchOrSha}:refs/remotes/origin/${targetBranchOrSha}`
+  ])
 }
