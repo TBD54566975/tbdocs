@@ -11,6 +11,7 @@ export const configInputs = {
   token: getInput('token'),
 
   docsReporter: (getInput('docs_reporter') || '') as DocsReporterType,
+  reportChangedScopeOnly: getInput('report_changed_scope_only') === 'true',
   failOnError: getInput('fail_on_error') === 'true',
   failOnWarnings: getInput('fail_on_warnings') === 'true',
   apiExtractor: {

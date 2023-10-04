@@ -18,6 +18,8 @@ RUN npm run build
 # Stage 2: Create the final runtime image
 FROM node:20-alpine
 
+RUN apk --no-cache add git
+
 # Set the working directory
 WORKDIR /app
 
