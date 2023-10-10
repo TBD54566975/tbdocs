@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 
-import { DocsReport, ReportMessage } from '.'
+import { DocsReport, ReportMessage } from '../docs-report'
 import { configInputs } from '../config'
 import { GithubContextData, getGithubContext, getOctokit } from '../utils'
 

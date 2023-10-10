@@ -9,7 +9,6 @@ import path from 'path'
 
 import { DocsReport, DocsReporterType, MessageCategory, ReportMessage } from '.'
 import { escapeTextForGithub, getJsonFile, lookupFile } from '../utils'
-import { configInputs } from '../config'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
 const tsconfig = require('tsconfck')
@@ -17,7 +16,7 @@ const tsconfig = require('tsconfck')
 export const generateApiExtractorReport = async (
   entryPointFile: string
 ): Promise<DocsReport> => {
-  const extractorConfig = await initializeExtractorConfig()
+  const extractorConfig = await initializeExtractorConfig(entryPointFile)
 
   const report = {
     reporter: 'api-extractor' as DocsReporterType,
@@ -101,8 +100,11 @@ const getCategoryFromApiExtractor = (
   }
 }
 
-const initializeExtractorConfig = async (): Promise<ExtractorConfig> => {
-  const apiExtractorCustomJson = configInputs.apiExtractor.jsonPath
+const initializeExtractorConfig = async (
+  entryPointFile: string
+): Promise<ExtractorConfig> => {
+  // TODO: we don't have this use case yet, but we should support it at some point
+  const apiExtractorCustomJson = undefined // configInputs.apiExtractor.jsonPath
 
   if (apiExtractorCustomJson) {
     console.info(
@@ -124,10 +126,14 @@ const initializeExtractorConfig = async (): Promise<ExtractorConfig> => {
 
     const config = ExtractorConfig.loadFile(defaultApiExtractorJson)
 
-    const initialProjectPath = configInputs.projectPath.startsWith('/')
-      ? configInputs.projectPath
-      : path.join(process.cwd(), configInputs.projectPath)
-    const packageJsonFullPath = lookupFile('package.json', initialProjectPath)
+    const entryPointFileFullPath = path.dirname(
+      path.join(process.cwd(), entryPointFile)
+    )
+
+    const packageJsonFullPath = lookupFile(
+      'package.json',
+      entryPointFileFullPath
+    )
 
     const projectPath = path.dirname(packageJsonFullPath)
 

@@ -2,8 +2,6 @@ import path from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 import { Application } from 'typedoc'
 
-import { configInputs } from '../config'
-
 // Required for the typedoc-plugin-markdown plugin
 declare module 'typedoc' {
   export interface TypeDocOptionMap {
@@ -56,11 +54,11 @@ export const generateTypedocMarkdown = async (
 
   await generatorApp.generateDocs(projectReflection, outputDir)
 
-  addTitleToIndexFile(projectReflection.packageName)
+  addTitleToIndexFile(projectReflection.packageName, outputDir)
 }
 
-const addTitleToIndexFile = (packageName = 'API Reference'): void => {
-  const indexMdPath = path.join(configInputs.docsDir, ENTRY_DOCUMENT)
+const addTitleToIndexFile = (packageName = 'API Reference', outputDir: string): void => {
+  const indexMdPath = path.join(outputDir, ENTRY_DOCUMENT)
   const indexFrontMatter = `---\ntitle: '${packageName}'\n---\n\n`
   const indexMdContent = readFileSync(indexMdPath, 'utf8')
   const updatedIndexMdContent = indexFrontMatter + indexMdContent

@@ -1,6 +1,6 @@
 import { AnnotationProperties, error, warning, notice } from '@actions/core'
 
-import { ReportMessage } from '.'
+import { ReportMessage } from '../docs-report'
 
 type AnnotationFunction = (
   message: string | Error,
