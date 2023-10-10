@@ -1,5 +1,5 @@
 import path from 'path'
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { Application } from 'typedoc'
 
 import { configInputs } from '../config'
@@ -16,20 +16,24 @@ declare module 'typedoc' {
 
 const ENTRY_DOCUMENT = 'index.md'
 
-export const generateTypedocMarkdown = async (): Promise<void> => {
+export const generateTypedocMarkdown = async (
+  entryPointFile: string,
+  outputDir: string
+): Promise<void> => {
   console.log('>>> Generating docs...')
 
   // TODO: improve this entry point search logic and allow it to be configurable too
-  let entryPoint = path.join(configInputs.projectPath, 'src/index.ts')
-  if (!existsSync(entryPoint)) {
-    entryPoint = path.join(configInputs.projectPath, 'index.ts')
-  }
-  if (!existsSync(entryPoint)) {
-    entryPoint = path.join(configInputs.projectPath, 'src/main.ts')
-  }
-  if (!existsSync(entryPoint)) {
-    entryPoint = path.join(configInputs.projectPath, 'main.ts')
-  }
+  // let entryPoint = path.join(configInputs.projectPath, 'src/index.ts')
+  // if (!existsSync(entryPoint)) {
+  //   entryPoint = path.join(configInputs.projectPath, 'index.ts')
+  // }
+  // if (!existsSync(entryPoint)) {
+  //   entryPoint = path.join(configInputs.projectPath, 'src/main.ts')
+  // }
+  // if (!existsSync(entryPoint)) {
+  //   entryPoint = path.join(configInputs.projectPath, 'main.ts')
+  // }
+  const entryPoint = entryPointFile
 
   console.log('>>> Typedoc Generator entryPoint', entryPoint)
   const generatorApp = await Application.bootstrapWithPlugins({
@@ -50,7 +54,7 @@ export const generateTypedocMarkdown = async (): Promise<void> => {
     throw new Error('Failed to generate docs')
   }
 
-  await generatorApp.generateDocs(projectReflection, configInputs.docsDir)
+  await generatorApp.generateDocs(projectReflection, outputDir)
 
   addTitleToIndexFile(projectReflection.packageName)
 }

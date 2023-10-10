@@ -5,7 +5,8 @@ import { DocsReport } from '.'
 import { annotateCode } from './annotate-code'
 import { generateApiExtractorReport } from './api-extractor'
 import { configInputs } from '../config'
-import { getFilesDiffs, isSourceInChangedScope } from '../utils'
+import { FilesDiffsMap, isSourceInChangedScope } from '../utils'
+import { DocsReporterType } from './interfaces'
 
 export * from './interfaces'
 
@@ -15,54 +16,59 @@ export * from './interfaces'
  *
  * @beta
  **/
-export const runDocsReport = async (): Promise<void> => {
-  const rawReport = await generateReport()
-  const report = await filterReport(rawReport)
-  await processReport(report)
-  setReportResults(report)
+export const runDocsReport = async (
+  docsReporter: DocsReporterType,
+  entryPointFile: string,
+  changedFiles?: FilesDiffsMap
+): Promise<DocsReport> => {
+  const report = await generateReport(docsReporter, entryPointFile)
+  return changedFiles ? filterReport(report, changedFiles) : report
+  // await processReport(report)
+  // setReportResults(report)
 }
 
-const generateReport = async (): Promise<DocsReport> => {
-  switch (configInputs.docsReporter) {
+const generateReport = async (
+  docsReporter: DocsReporterType,
+  entryPointFile: string
+): Promise<DocsReport> => {
+  switch (docsReporter) {
     case 'api-extractor':
-      return generateApiExtractorReport()
+      return generateApiExtractorReport(entryPointFile)
     default:
-      throw new Error(`Unknown docs report: ${configInputs.docsReporter}`)
+      throw new Error(`Unknown docs report: ${docsReporter}`)
   }
 }
 
-const filterReport = async (rawReport: DocsReport): Promise<DocsReport> => {
-  if (configInputs.reportChangedScopeOnly) {
-    const filesDiffs = await getFilesDiffs()
-    const filteredMessages = rawReport.messages.filter(
-      message =>
-        !message.sourceFilePath ||
-        isSourceInChangedScope(
-          filesDiffs,
-          message.sourceFilePath,
-          message.sourceFileLine
-        )
-    )
+const filterReport = (
+  rawReport: DocsReport,
+  changedFiles: FilesDiffsMap
+): DocsReport => {
+  const filteredMessages = rawReport.messages.filter(
+    message =>
+      !message.sourceFilePath ||
+      isSourceInChangedScope(
+        changedFiles,
+        message.sourceFilePath,
+        message.sourceFileLine
+      )
+  )
 
-    // recompute errors and warnings count
-    let errorsCount = 0
-    let warningsCount = 0
-    for (const message of filteredMessages) {
-      if (message.level === 'error') {
-        errorsCount++
-      } else if (message.level === 'warning') {
-        warningsCount++
-      }
+  // recompute errors and warnings count
+  let errorsCount = 0
+  let warningsCount = 0
+  for (const message of filteredMessages) {
+    if (message.level === 'error') {
+      errorsCount++
+    } else if (message.level === 'warning') {
+      warningsCount++
     }
+  }
 
-    return {
-      ...rawReport,
-      errorsCount,
-      warningsCount,
-      messages: filteredMessages
-    }
-  } else {
-    return rawReport
+  return {
+    ...rawReport,
+    errorsCount,
+    warningsCount,
+    messages: filteredMessages
   }
 }
 

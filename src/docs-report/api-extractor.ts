@@ -14,7 +14,9 @@ import { configInputs } from '../config'
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
 const tsconfig = require('tsconfck')
 
-export const generateApiExtractorReport = async (): Promise<DocsReport> => {
+export const generateApiExtractorReport = async (
+  entryPointFile: string
+): Promise<DocsReport> => {
   const extractorConfig = await initializeExtractorConfig()
 
   const report = {
