@@ -15,6 +15,7 @@ export interface GithubContextData {
   blobBaseUrl: string
   commitUrl: string
 }
+let githubContextData: GithubContextData | undefined
 
 export const escapeTextForGithub = (input: string): string => {
   let output = input
@@ -26,6 +27,10 @@ export const escapeTextForGithub = (input: string): string => {
 }
 
 export const getGithubContext = (): GithubContextData => {
+  if (githubContextData) {
+    return githubContextData
+  }
+
   const { repo: repoData, issue, sha, actor } = github.context
 
   if (!repoData) {
@@ -38,7 +43,7 @@ export const getGithubContext = (): GithubContextData => {
   const blobBaseUrl = `https://github.com/${owner}/${repo}/blob/${sha}`
   const commitUrl = `https://github.com/${owner}/${repo}/commit/${sha}`
 
-  return {
+  githubContextData = {
     owner,
     repo,
     actor,
@@ -48,6 +53,8 @@ export const getGithubContext = (): GithubContextData => {
     blobBaseUrl,
     commitUrl
   }
+
+  return githubContextData
 }
 
 export const getOctokit = (): Octokit => {

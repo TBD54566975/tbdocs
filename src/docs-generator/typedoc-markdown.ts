@@ -2,6 +2,9 @@ import path from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 import { Application } from 'typedoc'
 
+import { EntryPoint } from '../interfaces'
+import { lookupFile } from 'src/utils'
+
 // Required for the typedoc-plugin-markdown plugin
 declare module 'typedoc' {
   export interface TypeDocOptionMap {
@@ -15,9 +18,8 @@ declare module 'typedoc' {
 const ENTRY_DOCUMENT = 'index.md'
 
 export const generateTypedocMarkdown = async (
-  entryPointFile: string,
-  outputDir: string
-): Promise<void> => {
+  entryPoint: EntryPoint
+): Promise<string> => {
   console.log('>>> Generating docs...')
 
   // TODO: improve this entry point search logic and allow it to be configurable too
@@ -31,11 +33,11 @@ export const generateTypedocMarkdown = async (
   // if (!existsSync(entryPoint)) {
   //   entryPoint = path.join(configInputs.projectPath, 'main.ts')
   // }
-  const entryPoint = entryPointFile
+  const entryPointFile = entryPoint.file
 
-  console.log('>>> Typedoc Generator entryPoint', entryPoint)
+  console.log('>>> Typedoc Generator entryPoint', entryPointFile)
   const generatorApp = await Application.bootstrapWithPlugins({
-    entryPoints: [entryPoint],
+    entryPoints: [entryPointFile],
     skipErrorChecking: true,
     plugin: ['typedoc-plugin-markdown'],
     readme: 'none',
@@ -52,9 +54,24 @@ export const generateTypedocMarkdown = async (
     throw new Error('Failed to generate docs')
   }
 
+  // Set project name if not set before
+  if (!entryPoint.projectName) {
+    entryPoint.projectName = projectReflection.packageName
+  }
+
+  if (!entryPoint.projectPath) {
+    const entryPointDir = path.dirname(entryPointFile)
+    const packageJsonPath = lookupFile(entryPointDir, 'package.json')
+    entryPoint.projectPath = packageJsonPath
+  }
+
+  const outputDir = path.join(entryPoint.projectPath, '.tbdocs/docs')
+
   await generatorApp.generateDocs(projectReflection, outputDir)
 
   addTitleToIndexFile(projectReflection.packageName, outputDir)
+
+  return outputDir
 }
 
 const addTitleToIndexFile = (packageName = 'API Reference', outputDir: string): void => {

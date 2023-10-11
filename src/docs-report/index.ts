@@ -1,7 +1,7 @@
-import { DocsReport } from '.'
-import { generateApiExtractorReport } from './api-extractor'
 import { FilesDiffsMap, isSourceInChangedScope } from '../utils'
-import { DocsReporterType } from './interfaces'
+import { EntryPoint } from '../interfaces'
+import { generateApiExtractorReport } from './api-extractor'
+import { DocsReport, DocsReporterType } from './interfaces'
 
 export * from './interfaces'
 
@@ -12,23 +12,19 @@ export * from './interfaces'
  * @beta
  **/
 export const runDocsReport = async (
-  docsReporter: DocsReporterType,
-  entryPointFile: string,
+  entryPoint: EntryPoint,
   changedFiles?: FilesDiffsMap
 ): Promise<DocsReport> => {
-  const report = await generateReport(docsReporter, entryPointFile)
+  const report = await generateReport(entryPoint)
   return changedFiles ? filterReport(report, changedFiles) : report
 }
 
-const generateReport = async (
-  docsReporter: DocsReporterType,
-  entryPointFile: string
-): Promise<DocsReport> => {
-  switch (docsReporter) {
+const generateReport = async (entryPoint: EntryPoint): Promise<DocsReport> => {
+  switch (entryPoint.docsReporter) {
     case 'api-extractor':
-      return generateApiExtractorReport(entryPointFile)
+      return generateApiExtractorReport(entryPoint)
     default:
-      throw new Error(`Unknown docs report: ${docsReporter}`)
+      throw new Error(`Unknown docs report: ${entryPoint.docsReporter}`)
   }
 }
 

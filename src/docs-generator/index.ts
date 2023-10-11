@@ -1,6 +1,6 @@
 import { generateTypedocMarkdown } from './typedoc-markdown'
 
-import { DocsGeneratorType } from './interfaces'
+import { EntryPoint } from '../interfaces'
 
 export * from './interfaces'
 
@@ -9,15 +9,11 @@ export * from './interfaces'
  *
  * @beta
  **/
-export const generateDocs = (
-  docsGenerator: DocsGeneratorType,
-  entryPointFile: string,
-  outputDir: string
-): Promise<void> => {
-  switch (docsGenerator) {
+export const generateDocs = (entryPoint: EntryPoint): Promise<string> => {
+  switch (entryPoint.docsGenerator) {
     case 'typedoc-markdown':
-      return generateTypedocMarkdown(entryPointFile, outputDir)
+      return generateTypedocMarkdown(entryPoint)
     default:
-      throw new Error(`Unknown docs generator: ${docsGenerator}`)
+      throw new Error(`Unknown docs generator: ${entryPoint.docsGenerator}`)
   }
 }

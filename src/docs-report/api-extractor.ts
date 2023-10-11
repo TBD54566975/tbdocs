@@ -7,16 +7,27 @@ import {
 } from '@microsoft/api-extractor'
 import path from 'path'
 
-import { DocsReport, DocsReporterType, MessageCategory, ReportMessage } from '.'
+import {
+  DocsReport,
+  DocsReporterType,
+  MessageCategory,
+  ReportMessage
+} from './interfaces'
 import { escapeTextForGithub, getJsonFile, lookupFile } from '../utils'
+import { EntryPoint } from '../interfaces'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
 const tsconfig = require('tsconfck')
 
 export const generateApiExtractorReport = async (
-  entryPointFile: string
+  entryPoint: EntryPoint
 ): Promise<DocsReport> => {
-  const extractorConfig = await initializeExtractorConfig(entryPointFile)
+  const extractorConfig = await initializeExtractorConfig(entryPoint.file)
+  entryPoint.projectName = extractorConfig.packageJson?.name
+  entryPoint.projectPath = extractorConfig.projectFolder
+  console.info(
+    `>>> Detected project name '${entryPoint.projectName}' and path: '${entryPoint.projectPath}'`
+  )
 
   const report = {
     reporter: 'api-extractor' as DocsReporterType,

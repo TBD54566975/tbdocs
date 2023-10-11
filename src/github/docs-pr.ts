@@ -5,26 +5,20 @@ import { Octokit } from '@octokit/rest'
 
 import { getOctokit, wait } from '../utils'
 import { configInputs } from '../config'
+import { EntryPoint } from '../interfaces'
 
 /**
  * Open a PR to Github with the generated docs
  */
-export const openPr = async (): Promise<void> => {
+export const pushDocsPr = async (entryPoints: EntryPoint[]): Promise<void> => {
   console.log('>>> Opening PR...')
 
   const octokit = getOctokit()
   const [targetOwner, targetRepo] = configInputs.docsTargetOwnerRepo.split('/')
   const targetBranch = configInputs.docsTargetBranch
   const targetBase = configInputs.docsTargetPrBaseBranch
-  const targetRepoPath = configInputs.docsTargetRepoPath
 
-  if (
-    !targetOwner ||
-    !targetRepo ||
-    !targetBranch ||
-    !targetBase ||
-    !targetRepoPath
-  ) {
+  if (!targetOwner || !targetRepo || !targetBranch || !targetBase) {
     throw new Error(
       `Missing targetOwner, targetRepo, targetBranch, targetBase, or targetRepoPath`
     )
@@ -34,20 +28,35 @@ export const openPr = async (): Promise<void> => {
     targetOwner,
     targetRepo,
     targetBranch,
-    targetBase,
-    targetRepoPath
+    targetBase
   })
 
   await createBranch(octokit, targetOwner, targetRepo, targetBranch, targetBase)
-  await pushDocsToBranch(
-    octokit,
-    targetOwner,
-    targetRepo,
-    targetBranch,
-    targetRepoPath
-  )
+
+  for (const entryPoint of entryPoints) {
+    if (!entryPoint.generatedDocsPath) {
+      continue
+    }
+
+    if (!entryPoint.targetRepoPath) {
+      throw new Error(
+        `Entry point ${entryPoint.projectName} ${entryPoint.file} is missing targetRepoPath`
+      )
+    }
+
+    const generatedDocsPath = entryPoint.generatedDocsPath
+    await pushDocsToBranch(
+      generatedDocsPath,
+      octokit,
+      targetOwner,
+      targetRepo,
+      targetBranch,
+      entryPoint.targetRepoPath
+    )
+  }
 
   const pr = await createOrUpdatePr(
+    entryPoints,
     octokit,
     targetOwner,
     targetRepo,
@@ -108,13 +117,14 @@ const createBranch = async (
 }
 
 const pushDocsToBranch = async (
+  generatedDocsPath: string,
   octokit: Octokit,
   targetOwner: string,
   targetRepo: string,
   targetBranch: string,
   targetRepoPath: string
 ): Promise<void> => {
-  const files = readdirSync(configInputs.docsDir, {
+  const files = readdirSync(generatedDocsPath, {
     recursive: true,
     withFileTypes: true
   })
@@ -133,7 +143,7 @@ const pushDocsToBranch = async (
           encoding: 'base64'
         })
 
-        const fileSubpath = filePath.split(configInputs.docsDir)[1]
+        const fileSubpath = filePath.split(generatedDocsPath)[1]
 
         return {
           path: path.join(targetRepoPath, fileSubpath),
@@ -201,6 +211,7 @@ const pushDocsToBranch = async (
 }
 
 const createOrUpdatePr = async (
+  entryPoints: EntryPoint[],
   octokit: Octokit,
   targetOwner: string,
   targetRepo: string,
@@ -219,18 +230,23 @@ const createOrUpdatePr = async (
   const { owner, repo } = github.context.repo
   const repoUrl = `https://github.com/${owner}/${repo}`
 
+  const projectsSources = entryPoints
+    .map(ep => `- **${ep.projectName}**: ${ep.projectPath}`)
+    .join('\n')
+
   const body =
     `Automatic generated docs from the source code in the repository [${owner}/${repo}](${repoUrl})` +
     `\n\n` +
-    `Project source path: **${configInputs.projectPath}**` +
+    `Project source path: \n${projectsSources}` +
     `\n\n` +
-    `**Please use this PR for previewing and reviewing purposes only.\n` +
-    `DO NOT TOUCH this PR, since it will be updated automatically by the tbdocs pipeline.\n` +
-    `Instead, update the docs in the source code.**`
+    `**Feel free to adjust the docs metadata, but be aware that the docs markdown files ` +
+    `can be changed and resubmitted in this PR.**`
 
+  const jobLabel = `${github.context.job} #${github.context.runNumber}`
+  const jobLink = `${repoUrl}/actions/runs/${github.context.runId}`
   const footer =
     `Updated @ ${new Date().toISOString()} from ` +
-    `GH-Action Execution #${github.context.runId}-${github.context.runNumber}`
+    `GH-Action Execution [${jobLabel}](${jobLink})`
 
   const fullBody = `${body}\n\n---\n_${footer}_`
 
