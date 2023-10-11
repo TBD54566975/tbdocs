@@ -1,3 +1,5 @@
+import { hasPresentKey } from 'ts-is-present'
+
 import { EntryPoint } from '../interfaces'
 import { DocsReport, ReportMessage } from '../docs-report'
 import { getGithubContext } from '../utils'
@@ -14,8 +16,8 @@ export const submitReportsSummaryComment = async (
   const totalCounts = { errors: 0, warnings: 0 }
 
   const projectsComments = entryPoints
-    .filter(ep => ep.report)
-    .map(ep => processReport(ep.projectName, ep.report!, ep.file, totalCounts))
+    .filter(hasPresentKey('report'))
+    .map(ep => processReport(ep.projectName, ep.report, ep.file, totalCounts))
 
   const finalCommentBody = getTotalReportsSummaryCommentBody(
     projectsComments,
@@ -32,7 +34,7 @@ const processReport = (
   report: DocsReport,
   file: string,
   totalReportsAccumulator: { errors: number; warnings: number }
-) => {
+): string => {
   console.info(`${projectName} Report: ${JSON.stringify(report, undefined, 2)}`)
   annotateCode(report.messages)
   totalReportsAccumulator.errors += report.errorsCount
@@ -61,7 +63,7 @@ export const getTotalReportsSummaryCommentBody = (
 
   const reportHasIssues = errorsCount > 0 || warningsCount > 0
   const subHeaderText = reportHasIssues
-    ? `🛑 Errors: ${errorsCount}\n` + `⚠️ Warnings: ${warningsCount}`
+    ? `🛑 Errors: ${errorsCount}\n⚠️ Warnings: ${warningsCount}`
     : `✅ No errors or warnings`
 
   const filesTables = reportsComments.join('\n\n')

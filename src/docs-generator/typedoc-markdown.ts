@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from 'fs'
 import { Application } from 'typedoc'
 
 import { EntryPoint } from '../interfaces'
-import { lookupFile } from 'src/utils'
+import { lookupFile } from '../utils'
 
 // Required for the typedoc-plugin-markdown plugin
 declare module 'typedoc' {
@@ -74,7 +74,10 @@ export const generateTypedocMarkdown = async (
   return outputDir
 }
 
-const addTitleToIndexFile = (packageName = 'API Reference', outputDir: string): void => {
+const addTitleToIndexFile = (
+  packageName = 'API Reference',
+  outputDir: string
+): void => {
   const indexMdPath = path.join(outputDir, ENTRY_DOCUMENT)
   const indexFrontMatter = `---\ntitle: '${packageName}'\n---\n\n`
   const indexMdContent = readFileSync(indexMdPath, 'utf8')

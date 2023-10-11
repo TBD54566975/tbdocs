@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
 
-import { configInputs } from './config'
+import { configInputs, getInputEntryPoints } from './config'
 import { runDocsReport } from './docs-report'
 import { generateDocs } from './docs-generator'
-import { EntryPoint } from './interfaces'
+
 import { getFilesDiffs } from './utils'
 import { handleGithubDocsReport, handleGithubGeneratedDocs } from './github'
 
@@ -21,7 +21,8 @@ export async function run(): Promise<void> {
       failOnWarnings
     } = configInputs
 
-    const entryPoints: EntryPoint[] = []
+    const entryPoints = getInputEntryPoints()
+    console.info('eps >>>', entryPoints)
 
     const changedFiles = reportChangedScopeOnly
       ? await getFilesDiffs()

@@ -1,13 +1,16 @@
 import { DocsGeneratorType } from './docs-generator'
 import { DocsReport, DocsReporterType } from './docs-report'
 
-export interface EntryPoint {
+export interface EntryPointInputs {
   file: string
+  docsReporter?: DocsReporterType
+  docsGenerator?: DocsGeneratorType
+  targetRepoPath?: string
+}
+
+export interface EntryPoint extends EntryPointInputs {
   projectPath?: string
   projectName?: string
-  docsReporter?: DocsReporterType
   report?: DocsReport
-  docsGenerator?: DocsGeneratorType
   generatedDocsPath?: string
-  targetRepoPath?: string
 }

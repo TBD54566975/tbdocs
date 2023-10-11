@@ -1,7 +1,7 @@
 import { FilesDiffsMap, isSourceInChangedScope } from '../utils'
 import { EntryPoint } from '../interfaces'
 import { generateApiExtractorReport } from './api-extractor'
-import { DocsReport, DocsReporterType } from './interfaces'
+import { DocsReport } from './interfaces'
 
 export * from './interfaces'
 

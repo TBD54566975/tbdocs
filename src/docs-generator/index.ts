@@ -9,7 +9,7 @@ export * from './interfaces'
  *
  * @beta
  **/
-export const generateDocs = (entryPoint: EntryPoint): Promise<string> => {
+export const generateDocs = async (entryPoint: EntryPoint): Promise<string> => {
   switch (entryPoint.docsGenerator) {
     case 'typedoc-markdown':
       return generateTypedocMarkdown(entryPoint)

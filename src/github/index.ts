@@ -5,7 +5,7 @@ import { submitReportsSummaryComment } from './comment-report'
 import { DocsReport } from '../docs-report'
 import { pushDocsPr } from './docs-pr'
 
-export const handleGithubGeneratedDocs = (
+export const handleGithubGeneratedDocs = async (
   entryPoints: EntryPoint[]
 ): Promise<void> => {
   return pushDocsPr(entryPoints)
