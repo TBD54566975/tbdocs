@@ -44,6 +44,10 @@ jobs:
         id: npm-ci-test
         run: npm run ci-test
 
+      - name: Build Example
+        id: example-npm-build
+        run: cd examples/foo && npm ci && npm run build && cd ../..
+
       - name: TBDocs Reporter
         id: tbdocs-reporter
         uses: ./
