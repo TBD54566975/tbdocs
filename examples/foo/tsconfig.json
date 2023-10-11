@@ -3,14 +3,12 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",
-    // "rootDir": "./src",
     "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "baseUrl": "./",
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-    "declarationDir": "./dist/types",
     "outDir": "./dist",
     "noImplicitAny": true,
     "esModuleInterop": true,
@@ -19,6 +17,6 @@
     "skipLibCheck": true,
     "newLine": "lf"
   },
-  // "include": ["."],
+  "include": ["./index.ts"],
   "exclude": ["./dist", "./node_modules"]
 }

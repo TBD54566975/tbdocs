@@ -22,7 +22,7 @@ export async function run(): Promise<void> {
     } = configInputs
 
     const entryPoints = getInputEntryPoints()
-    console.info('eps >>>', entryPoints)
+    console.info('Processing EntryPoints >>>', entryPoints)
 
     const changedFiles = reportChangedScopeOnly
       ? await getFilesDiffs()
@@ -40,6 +40,17 @@ export async function run(): Promise<void> {
         console.info(`Executing docs generator ${entryPoint.docsGenerator} ...`)
         entryPoint.generatedDocsPath = await generateDocs(entryPoint)
       }
+
+      console.info(
+        JSON.stringify(
+          {
+            report: entryPoint.report,
+            generatedDocsPath: entryPoint.generatedDocsPath
+          },
+          null,
+          2
+        )
+      )
     }
 
     await handleGithubDocsReport(entryPoints, failOnError, failOnWarnings)

@@ -13,11 +13,13 @@ import {
   MessageCategory,
   ReportMessage
 } from './interfaces'
-import { escapeTextForGithub, getJsonFile, lookupFile } from '../utils'
+import {
+  escapeTextForGithub,
+  getJsonFile,
+  loadTsconfigProps,
+  lookupFile
+} from '../utils'
 import { EntryPoint } from '../interfaces'
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
-const tsconfig = require('tsconfck')
 
 export const generateApiExtractorReport = async (
   entryPoint: EntryPoint
@@ -148,7 +150,7 @@ const initializeExtractorConfig = async (
 
     const projectPath = path.dirname(packageJsonFullPath)
 
-    await checkTsconfigProps(projectPath)
+    await loadTsconfigProps(projectPath)
 
     const { typings } = getPackageRequiredFields(packageJsonFullPath)
     config.projectFolder = projectPath
@@ -202,28 +204,4 @@ const getPackageRequiredFields = (
   }
 
   return { typings, main }
-}
-
-const checkTsconfigProps = async (projectPath: string): Promise<void> => {
-  // const tsconfig = await import('tsconfck')
-
-  const tsc = await tsconfig.parse(path.join(projectPath, 'tsconfig.json'))
-
-  if (!tsc?.tsconfigFile) {
-    throw new Error('Could not resolve tsconfig.json')
-  }
-
-  console.info('>>> tsconfig.json:', { tsc })
-  console.info('>>> tsconfig file', tsc.tsconfigFile)
-
-  const tsConfig = tsc.tsconfig
-  if (
-    !tsConfig.compilerOptions ||
-    !tsConfig.compilerOptions.declaration ||
-    !tsConfig.compilerOptions.declarationMap
-  ) {
-    throw new Error(
-      'tsconfig.json must have declaration and declarationMap set to true'
-    )
-  }
 }

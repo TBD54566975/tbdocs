@@ -48,12 +48,18 @@ jobs:
         id: tbdocs-reporter
         uses: ./
         with:
-          docs_reporter: api-extractor
           fail_on_error: true
           fail_on_warnings: true
           bot_app_id: ${{ secrets.BOT_APP_ID }}
           bot_app_private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
           bot_app_installation_id: ${{ secrets.BOT_APP_INSTALLATION_ID }}
+          entry_points: |
+            - file: src/index.ts
+              docsReporter: api-extractor
+              docsGenerator: typedoc-markdown
+            - file: examples/foo/index.ts
+              docsReporter: api-extractor
+              docsGenerator: typedoc-markdown
 
       - name: Save Artifacts
         uses: actions/upload-artifact@v3

@@ -40,7 +40,8 @@ flowchart TD
 **Typescript**
 
 - docs standard: [TSDoc](https://tsdoc.org/)
-- docs-reporter: [api-extractor](https://api-extractor.com/pages/overview/intro/)
+- docs-reporter:
+  [api-extractor](https://api-extractor.com/pages/overview/intro/)
 - docs-generator:
   [typedoc-plugin-markdown](https://github.com/tgreyuk/typedoc-plugin-markdown)
 
@@ -71,8 +72,8 @@ This will run the doc-reporter as above but it will also run the markdown docs
 generator and open a PR against the target repo (the SSG website which knows how
 to render Markdown, think docusaurus, hugo etc.).
 
-You will want to do this generally on Release PRs or Release automations, so 
-that the docs are being published when new versions of the APIs are being 
+You will want to do this generally on Release PRs or Release automations, so
+that the docs are being published when new versions of the APIs are being
 released to the public.
 
 ```yml
@@ -122,18 +123,21 @@ inputs:
     required: false
     default: 'false'
   api_extractor_json_path:
-    description: 'Path to the api-extractor.json file (if you need customization)'
+    description:
+      'Path to the api-extractor.json file (if you need customization)'
     required: false
     default: ''
 
   # generator params
   docs_generator:
-    description: 'Name of the docs generator tool (skips docs generation if empty)'
+    description:
+      'Name of the docs generator tool (skips docs generation if empty)'
     required: false
 
   # if you want to open a PR with the generated docs
   docs_target_owner_repo:
-    description: 'Target owner/repo for the generated docs PR (skips opening a PR if empty)'
+    description:
+      'Target owner/repo for the generated docs PR (skips opening a PR if empty)'
     required: false
   docs_target_branch:
     description: 'Target branch for the generated docs PR'
@@ -149,7 +153,7 @@ inputs:
     default: 'docs'
 
   # to allow opening PRs across different repos we need an authorized bot app
-  # you could also use a user PAT in the above token field, but the generated 
+  # you could also use a user PAT in the above token field, but the generated
   # comments/PRs will be owned by the user
   bot_app_id:
     description: 'Bot app id'
@@ -165,8 +169,8 @@ inputs:
 #### Allowed `docs_reporter` and `docs_generator` combinations values
 
 - **Typescript:**
-   - docs_reporter: `api-extractor`
-   - docs_generator: `typedoc-markdown`
+  - docs_reporter: `api-extractor`
+  - docs_generator: `typedoc-markdown`
 
 ## Initial Setup
 
@@ -189,36 +193,32 @@ need to perform some initial setup steps before you can develop your action.
 1. :building_construction: Package the TypeScript for distribution
 
    ```bash
-   npm run bundle
+   npm run build
    ```
 
 1. :white_check_mark: Run the tests
 
    ```bash
-   $ npm test
-
-   PASS  ./index.test.js
-     ✓ throws invalid number (3ms)
-     ✓ wait 500 ms (504ms)
-     ✓ test runs (95ms)
-
-   ...
+   npm test
    ```
 
 ## Running locally
 
 ```sh
 export GITHUB_REPOSITORY=test/test
-export INPUT_DOCS_REPORTER=api-extractor
-export INPUT_DOCS_GENERATOR=typedoc-markdown
 
+node scripts/main.js
+
+# if you want to test multiple packages processing
+cd examples/foo && npm i && npm run build && cd ../..
 export INPUT_ENTRY_POINTS="
 - file: src/index.ts
   docsReporter: api-extractor
+  docsGenerator: typedoc-markdown
 - file: examples/foo/index.ts
   docsReporter: api-extractor
+  docsGenerator: typedoc-markdown
 "
-
 node scripts/main.js
 ```
 

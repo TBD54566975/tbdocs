@@ -7,6 +7,7 @@ export const getInputEntryPoints = (): EntryPoint[] => {
   const defaultEntryPoint = `
   - file: src/index.ts
     docsReporter: api-extractor
+    docsGenerator: typedoc-markdown
   `
 
   const entryPointsRawYaml = getInput('entry_points') || defaultEntryPoint

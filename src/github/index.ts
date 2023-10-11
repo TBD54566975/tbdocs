@@ -31,19 +31,21 @@ const getReportResults = (
     entryPointFile: string
   })[] = []
 
-  for (const { report, file } of entryPoints) {
+  for (const { report, file, projectName, projectPath } of entryPoints) {
     if (!report) {
       continue
     }
 
+    const projectPrefix = projectName || projectPath || file
+
     if (report.errorsCount > 0) {
-      const errorMessage = `Docs report ${report.reporter} failed with ${report.errorsCount} errors.`
+      const errorMessage = `${projectPrefix} - Docs report ${report.reporter} failed with ${report.errorsCount} errors.`
       console.error(errorMessage)
       errors.push(errorMessage)
     }
 
     if (report.warningsCount > 0) {
-      const warningMessage = `Docs report ${report.reporter} completed with ${report.warningsCount} warnings.`
+      const warningMessage = `${projectPrefix} - Docs report ${report.reporter} completed with ${report.warningsCount} warnings.`
       warning(warningMessage)
       warnings.push(warningMessage)
     }
