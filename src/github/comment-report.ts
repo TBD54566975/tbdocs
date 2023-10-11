@@ -47,7 +47,7 @@ export const getCommentReportSummary = (
   projectName: string,
   entryPointFile: string
 ): string => {
-  const projectHeader = `**Project**: ${projectName} - ${entryPointFile}`
+  const projectHeader = `## ${projectName}\n- Project entry file: \`${entryPointFile}\``
   const filesTable = generateFilesTable(report)
   const commentBody = `${projectHeader}\n\n${filesTable}`
   console.info(`>>> Report comment for project ${projectName}\n`, commentBody)

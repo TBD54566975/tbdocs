@@ -237,11 +237,22 @@ docker run -v $(pwd):/github/workspace/ \
    tbdocs-app
 
 # to test opening a PR with the generated docs
+export INPUT_ENTRY_POINTS="
+- file: packages/protocol/src/main.ts
+  docsReporter: api-extractor
+  docsGenerator: typedoc-markdown
+- file: packages/http-client/src/main.ts
+  docsReporter: api-extractor
+  docsGenerator: typedoc-markdown
+- file: packages/http-server/src/main.ts
+  docsReporter: api-extractor
+  docsGenerator: typedoc-markdown
+"
+
 docker run -v $(pwd):/github/workspace/ \
    --workdir /github/workspace          \
    -e "GITHUB_REPOSITORY=TBD54566975/tbdex-js" \
-   -e "INPUT_PROJECT_PATH=packages/protocol"   \
-   -e "INPUT_DOCS_GENERATOR=typedoc-markdown"  \
+   -e "INPUT_ENTRY_POINTS=${INPUT_ENTRY_POINTS}" \
    -e "INPUT_DOCS_TARGET_OWNER_REPO=TBD54566975/developer.tbd.website" \
    -e "INPUT_DOCS_TARGET_BRANCH=tbdocs_tbdex-js_protocol_v0.1.2" \
    -e "INPUT_DOCS_TARGET_PR_BASE_BRANCH=main" \
