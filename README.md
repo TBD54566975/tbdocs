@@ -211,6 +211,14 @@ need to perform some initial setup steps before you can develop your action.
 export GITHUB_REPOSITORY=test/test
 export INPUT_DOCS_REPORTER=api-extractor
 export INPUT_DOCS_GENERATOR=typedoc-markdown
+
+export INPUT_ENTRY_POINTS="
+- file: src/index.ts
+  docsReporter: api-extractor
+- file: examples/foo/index.ts
+  docsReporter: api-extractor
+"
+
 node scripts/main.js
 ```
 
