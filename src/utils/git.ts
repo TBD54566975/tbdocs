@@ -1,11 +1,11 @@
 import path from 'path'
 import { simpleGit } from 'simple-git'
-import { getBaseInfo } from '.'
+import { getBaseInfo } from './github'
 
 /**
- * Git diff data for a file. 
+ * Git diff data for a file.
  *
- * @beta 
+ * @beta
  **/
 export interface GitDiffs {
   /** Original line number */
@@ -23,7 +23,7 @@ export interface GitDiffs {
 
 /**
  * Map of files and their diffs.
- * 
+ *
  * @beta
  */
 export type FilesDiffsMap = Record<string, GitDiffs[]>
