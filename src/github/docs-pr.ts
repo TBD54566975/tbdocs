@@ -46,6 +46,7 @@ export const pushDocsPr = async (entryPoints: EntryPoint[]): Promise<void> => {
 
     const generatedDocsPath = entryPoint.generatedDocsPath
     await pushDocsToBranch(
+      entryPoint.projectName || '(unknown)',
       generatedDocsPath,
       octokit,
       targetOwner,
@@ -117,6 +118,7 @@ const createBranch = async (
 }
 
 const pushDocsToBranch = async (
+  projectName: string,
   generatedDocsPath: string,
   octokit: Octokit,
   targetOwner: string,
@@ -192,7 +194,7 @@ const pushDocsToBranch = async (
   const { data: newCommitData } = await octokit.rest.git.createCommit({
     owner: targetOwner,
     repo: targetRepo,
-    message: `tbdocs: committing generated docs files ${github.context.runId}-${github.context.runNumber}`,
+    message: `tbdocs: generated docs for ${projectName}`,
     tree: treeData.sha,
     parents: [commitSHA]
   })
@@ -231,7 +233,12 @@ const createOrUpdatePr = async (
   const repoUrl = `https://github.com/${owner}/${repo}`
 
   const projectsSources = entryPoints
-    .map(ep => `- **${ep.projectName}**: ${ep.projectPath}`)
+    .map(ep => {
+      // removes the unneeded github workspace prefix from the path
+      const projectPath =
+        ep.projectPath?.replace('/github/workspace/', '') || '.'
+      return `- **${ep.projectName}**: ${projectPath}`
+    })
     .join('\n')
 
   const body =
@@ -240,7 +247,7 @@ const createOrUpdatePr = async (
     `Project source path: \n${projectsSources}` +
     `\n\n` +
     `**Feel free to adjust the docs metadata, but be aware that the docs markdown files ` +
-    `can be changed and resubmitted in this PR.**`
+    `can be changed and resubmitted in this PR, since they are automatically generated.**`
 
   const jobLabel = `${github.context.job} #${github.context.runNumber}`
   const jobLink = `${repoUrl}/actions/runs/${github.context.runId}`
