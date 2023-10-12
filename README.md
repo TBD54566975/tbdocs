@@ -19,7 +19,7 @@ TBDocs has two main components:
 - **docs-generator**: scan your codebase to extract all the docs annotations and
   generate markdown files.
 
-**Regular PRs against main branch:**
+**CI: Regular PRs against main branch:**
 
 ```mermaid
 flowchart TD
@@ -57,14 +57,18 @@ the docs warnings and errors that the reporter found in a comment on your PR.
 ```yml
 # after ts build step
 - name: TBDocs Reporter
-  id: tbdocs-reporter-protocol
+  id: tbdocs-reporter
   uses: TBD54566975/tbdocs@main
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
-    project_path: './packages/protocol'
-    docs_reporter: 'api-extractor'
-    fail_on_error: false # change to true if you want to block on doc errors
+    report_changed_scope_only: false # change to true to report only changed files
+    fail_on_error: false
+    entry_points: |
+      - file: packages/protocol/src/main.ts
+        docsReporter: api-extractor
 ```
+
+PS: you can add multiple entry points, it's a YAML list.
 
 ### Running the docs-reporter + docs-generator on the Release process
 
@@ -72,9 +76,9 @@ This will run the doc-reporter as above but it will also run the markdown docs
 generator and open a PR against the target repo (the SSG website which knows how
 to render Markdown, think docusaurus, hugo etc.).
 
-You will want to do this generally on Release PRs or Release automations, so
-that the docs are being published when new versions of the APIs are being
-released to the public.
+You will want to do this generally on Release PRs or Release automation, so that
+the docs are being published when new versions of the APIs are being released to
+the public.
 
 ```yml
 # after ts build step
@@ -82,15 +86,20 @@ released to the public.
   uses: TBD54566975/tbdocs@main
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
-    project_path: './packages/protocol'
-    docs_reporter: 'api-extractor'
     fail_on_error: true # you probably want to block releases with errors
     fail_on_warnings: true # depends on your project docs diligence
-    docs_generator: 'typedoc-markdown'
     docs_target_owner_repo: 'TBD54566975/developer.tbd.website'
     docs_target_branch: 'tbdocs_tbdex-js_protocol_release'
     docs_target_pr_base_branch: 'main'
-    docs_target_repo_path: 'site/docs/tbdex-js/api-reference/protocol'
+    entry_points: |
+      - file: packages/protocol/src/main.ts
+        docsReporter: api-extractor
+        docsGenerator: typedoc-markdown
+        targetRepoPath: site/docs/tbdex/api-reference/tbdex-js/protocol
+      - file: packages/http-client/src/main.ts
+        docsReporter: api-extractor
+        docsGenerator: typedoc-markdown
+        targetRepoPath: site/docs/tbdex/api-reference/tbdex-js/http-client
 ```
 
 PS: if you like to expose the docs of unstable/next versions you could put this
@@ -98,73 +107,10 @@ config also for merges against the `main` branch.
 
 ### GH Action Inputs Parameters
 
-Copied from the GH Action definition on [action.yml](./action.yml):
+See the commented GH Action input parameters definition on
+[action.yml](./action.yml).
 
-```yml
-inputs:
-  token:
-    description: 'Token used to submit comments summary and open PRs'
-    required: false
-  project_path:
-    description: 'Path to the project root'
-    required: false
-    default: '.'
-
-  # reporter params
-  docs_reporter:
-    description: 'Name of the docs reporter tool (skips report if empty)'
-    required: false
-  fail_on_error:
-    description: 'Should it fail on report errors?'
-    required: false
-    default: 'true'
-  fail_on_warnings:
-    description: 'Should it fail on report warnings?'
-    required: false
-    default: 'false'
-  api_extractor_json_path:
-    description:
-      'Path to the api-extractor.json file (if you need customization)'
-    required: false
-    default: ''
-
-  # generator params
-  docs_generator:
-    description:
-      'Name of the docs generator tool (skips docs generation if empty)'
-    required: false
-
-  # if you want to open a PR with the generated docs
-  docs_target_owner_repo:
-    description:
-      'Target owner/repo for the generated docs PR (skips opening a PR if empty)'
-    required: false
-  docs_target_branch:
-    description: 'Target branch for the generated docs PR'
-    required: false
-    default: 'main'
-  docs_target_pr_base_branch:
-    description: 'Target base branch for the generated docs PR'
-    required: false
-    default: 'main'
-  docs_target_repo_path:
-    description: 'Target repo directory to insert the generated docs'
-    required: false
-    default: 'docs'
-
-  # to allow opening PRs across different repos we need an authorized bot app
-  # you could also use a user PAT in the above token field, but the generated
-  # comments/PRs will be owned by the user
-  bot_app_id:
-    description: 'Bot app id'
-    required: false
-  bot_app_private_key:
-    description: 'Bot app private key (pem format)'
-    required: false
-  bot_app_installation_id:
-    description: 'Bot app installation id'
-    required: false
-```
+If they are not detailed enough, please feel free to open an issue!
 
 #### Allowed `docs_reporter` and `docs_generator` combinations values
 
@@ -172,10 +118,10 @@ inputs:
   - docs_reporter: `api-extractor`
   - docs_generator: `typedoc-markdown`
 
-## Initial Setup
+## Development Setup
 
-After you've cloned the repository to your local machine or codespace, you'll
-need to perform some initial setup steps before you can develop your action.
+After you've cloned the repository, you'll need to perform some initial setup
+steps before you can develop your action.
 
 > [!NOTE]
 >
@@ -202,10 +148,15 @@ need to perform some initial setup steps before you can develop your action.
    npm test
    ```
 
-## Running locally
+### Running locally
+
+The following will run the `tbdocs` action against this own repo. It should run
+the docs-reporter which will print the report warnings (and also store a few
+reporter files in `.tbdocs/reporter`) in the console log, and also generate the
+docs markdown files in the folder `.tbdocs/docs`.
 
 ```sh
-export GITHUB_REPOSITORY=test/test
+export GITHUB_REPOSITORY=test-user/test-repo
 
 node scripts/main.js
 
@@ -222,21 +173,18 @@ export INPUT_ENTRY_POINTS="
 node scripts/main.js
 ```
 
-## Testing with Docker
+### Testing with Docker
+
+The following is useful if you want to test this `tbdocs` against another repo
+that you have in your local environment without needing to setup and wait for a
+real GH action execution.
 
 ```sh
 docker build -f Dockerfile . --tag tbdocs-app:latest
 
 # now from the repo you want to analyze & generate docs
-docker run -v $(pwd):/github/workspace/ \
-   --workdir /github/workspace          \
-   -e "GITHUB_REPOSITORY=org/repo"      \
-   -e "INPUT_PROJECT_PATH=."            \
-   -e "INPUT_DOCS_REPORTER=api-extractor" \
-   -e "INPUT_DOCS_GENERATOR=typedoc-markdown" \
-   tbdocs-app
-
-# to test opening a PR with the generated docs
+# below is an example of running it from the root of tbdex-js repo
+# https://github.com/TBD54566975/tbdex-js
 export INPUT_ENTRY_POINTS="
 - file: packages/protocol/src/main.ts
   docsReporter: api-extractor
@@ -253,15 +201,10 @@ docker run -v $(pwd):/github/workspace/ \
    --workdir /github/workspace          \
    -e "GITHUB_REPOSITORY=TBD54566975/tbdex-js" \
    -e "INPUT_ENTRY_POINTS=${INPUT_ENTRY_POINTS}" \
-   -e "INPUT_DOCS_TARGET_OWNER_REPO=TBD54566975/developer.tbd.website" \
-   -e "INPUT_DOCS_TARGET_BRANCH=tbdocs_tbdex-js_protocol_v0.1.2" \
-   -e "INPUT_DOCS_TARGET_PR_BASE_BRANCH=main" \
-   -e "INPUT_DOCS_TARGET_REPO_PATH=site/docs/tbdex-js/api-reference/protocol" \
-   -e "INPUT_TOKEN=<gh-token>" \
    tbdocs-app
 ```
 
-## Update the Action Code
+### Update the Action Code
 
 1. Create a new branch
 
