@@ -19,7 +19,6 @@ export const getInputEntryPoints = (): EntryPoint[] => {
   }
 
   const entryPoints = yamlDoc.toJS() as EntryPoint[]
-  console.info(entryPoints)
   return entryPoints
 }
 
