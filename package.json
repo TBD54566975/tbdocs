@@ -76,9 +76,11 @@
     "@octokit/webhooks-definitions": "^3.67.3",
     "fs": "^0.0.1-security",
     "simple-git": "^3.20.0",
+    "ts-is-present": "^1.2.2",
     "tsconfck": "^2.1.2",
     "typedoc": "^0.25.1",
-    "typedoc-plugin-markdown": "^3.16.0"
+    "typedoc-plugin-markdown": "^3.16.0",
+    "yaml": "^2.3.2"
   },
   "devDependencies": {
     "@types/jest": "^29.5.5",

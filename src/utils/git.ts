@@ -1,14 +1,31 @@
 import path from 'path'
 import { simpleGit } from 'simple-git'
-import { getBaseInfo } from '.'
+import { getBaseInfo } from './github'
 
+/**
+ * Git diff data for a file.
+ *
+ * @beta
+ **/
 export interface GitDiffs {
+  /** Original line number */
   originalLine: number
+
+  /** Original line offset */
   originalOffset?: number
+
+  /** Updated line number */
   updatedLine: number
+
+  /** Updated line offset */
   updatedOffset?: number
 }
 
+/**
+ * Map of files and their diffs.
+ *
+ * @beta
+ */
 export type FilesDiffsMap = Record<string, GitDiffs[]>
 
 const git = simpleGit()

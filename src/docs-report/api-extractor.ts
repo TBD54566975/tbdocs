@@ -7,15 +7,29 @@ import {
 } from '@microsoft/api-extractor'
 import path from 'path'
 
-import { DocsReport, DocsReporterType, MessageCategory, ReportMessage } from '.'
-import { escapeTextForGithub, getJsonFile, lookupFile } from '../utils'
-import { configInputs } from '../config'
+import {
+  DocsReport,
+  DocsReporterType,
+  MessageCategory,
+  ReportMessage
+} from './interfaces'
+import {
+  escapeTextForGithub,
+  getJsonFile,
+  loadTsconfigProps,
+  lookupFile
+} from '../utils'
+import { EntryPoint } from '../interfaces'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, import/no-commonjs
-const tsconfig = require('tsconfck')
-
-export const generateApiExtractorReport = async (): Promise<DocsReport> => {
-  const extractorConfig = await initializeExtractorConfig()
+export const generateApiExtractorReport = async (
+  entryPoint: EntryPoint
+): Promise<DocsReport> => {
+  const extractorConfig = await initializeExtractorConfig(entryPoint.file)
+  entryPoint.projectName = extractorConfig.packageJson?.name
+  entryPoint.projectPath = extractorConfig.projectFolder
+  console.info(
+    `>>> Detected project name '${entryPoint.projectName}' and path: '${entryPoint.projectPath}'`
+  )
 
   const report = {
     reporter: 'api-extractor' as DocsReporterType,
@@ -99,8 +113,11 @@ const getCategoryFromApiExtractor = (
   }
 }
 
-const initializeExtractorConfig = async (): Promise<ExtractorConfig> => {
-  const apiExtractorCustomJson = configInputs.apiExtractor.jsonPath
+const initializeExtractorConfig = async (
+  entryPointFile: string
+): Promise<ExtractorConfig> => {
+  // TODO: we don't have this use case yet, but we should support it at some point
+  const apiExtractorCustomJson = undefined // configInputs.apiExtractor.jsonPath
 
   if (apiExtractorCustomJson) {
     console.info(
@@ -122,14 +139,18 @@ const initializeExtractorConfig = async (): Promise<ExtractorConfig> => {
 
     const config = ExtractorConfig.loadFile(defaultApiExtractorJson)
 
-    const initialProjectPath = configInputs.projectPath.startsWith('/')
-      ? configInputs.projectPath
-      : path.join(process.cwd(), configInputs.projectPath)
-    const packageJsonFullPath = lookupFile('package.json', initialProjectPath)
+    const entryPointFileFullPath = path.dirname(
+      path.join(process.cwd(), entryPointFile)
+    )
+
+    const packageJsonFullPath = lookupFile(
+      'package.json',
+      entryPointFileFullPath
+    )
 
     const projectPath = path.dirname(packageJsonFullPath)
 
-    await checkTsconfigProps(projectPath)
+    await loadTsconfigProps(projectPath)
 
     const { typings } = getPackageRequiredFields(packageJsonFullPath)
     config.projectFolder = projectPath
@@ -183,28 +204,4 @@ const getPackageRequiredFields = (
   }
 
   return { typings, main }
-}
-
-const checkTsconfigProps = async (projectPath: string): Promise<void> => {
-  // const tsconfig = await import('tsconfck')
-
-  const tsc = await tsconfig.parse(path.join(projectPath, 'tsconfig.json'))
-
-  if (!tsc?.tsconfigFile) {
-    throw new Error('Could not resolve tsconfig.json')
-  }
-
-  console.info('>>> tsconfig.json:', { tsc })
-  console.info('>>> tsconfig file', tsc.tsconfigFile)
-
-  const tsConfig = tsc.tsconfig
-  if (
-    !tsConfig.compilerOptions ||
-    !tsConfig.compilerOptions.declaration ||
-    !tsConfig.compilerOptions.declarationMap
-  ) {
-    throw new Error(
-      'tsconfig.json must have declaration and declarationMap set to true'
-    )
-  }
 }

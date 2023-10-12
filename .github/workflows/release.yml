@@ -46,11 +46,13 @@ jobs:
           bot_app_id: ${{ secrets.BOT_APP_ID }}
           bot_app_private_key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
           bot_app_installation_id: ${{ secrets.BOT_APP_INSTALLATION_ID }}
-          docs_reporter: api-extractor
           fail_on_error: true
           fail_on_warnings: true
-          docs_generator: 'typedoc-markdown'
           docs_target_owner_repo: 'TBD54566975/developer.tbd.website'
-          docs_target_branch: 'tbdocs_release-${{ github.event.release && github.event.release.tag_name || github.event.inputs.release_version }}'
+          docs_target_branch: 'tbdocs-bot/tbdocs'
           docs_target_pr_base_branch: 'main'
-          docs_target_repo_path: 'site/docs/misc/tbdocs'
+          entry_points: |
+            - file: src/index.ts
+              docsReporter: api-extractor
+              docsGenerator: typedoc-markdown
+              targetRepoPath: site/docs/misc/api-reference/tbdocs

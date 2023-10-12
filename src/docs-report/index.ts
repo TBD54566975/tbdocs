@@ -1,11 +1,7 @@
-import { setOutput, warning } from '@actions/core'
-
-import { commentReportSummary } from './comment-report'
-import { DocsReport } from '.'
-import { annotateCode } from './annotate-code'
+import { FilesDiffsMap, isSourceInChangedScope } from '../utils'
+import { EntryPoint } from '../interfaces'
 import { generateApiExtractorReport } from './api-extractor'
-import { configInputs } from '../config'
-import { getFilesDiffs, isSourceInChangedScope } from '../utils'
+import { DocsReport } from './interfaces'
 
 export * from './interfaces'
 
@@ -15,80 +11,52 @@ export * from './interfaces'
  *
  * @beta
  **/
-export const runDocsReport = async (): Promise<void> => {
-  const rawReport = await generateReport()
-  const report = await filterReport(rawReport)
-  await processReport(report)
-  setReportResults(report)
+export const runDocsReport = async (
+  entryPoint: EntryPoint,
+  changedFiles?: FilesDiffsMap
+): Promise<DocsReport> => {
+  const report = await generateReport(entryPoint)
+  return changedFiles ? filterReport(report, changedFiles) : report
 }
 
-const generateReport = async (): Promise<DocsReport> => {
-  switch (configInputs.docsReporter) {
+const generateReport = async (entryPoint: EntryPoint): Promise<DocsReport> => {
+  switch (entryPoint.docsReporter) {
     case 'api-extractor':
-      return generateApiExtractorReport()
+      return generateApiExtractorReport(entryPoint)
     default:
-      throw new Error(`Unknown docs report: ${configInputs.docsReporter}`)
+      throw new Error(`Unknown docs report: ${entryPoint.docsReporter}`)
   }
 }
 
-const filterReport = async (rawReport: DocsReport): Promise<DocsReport> => {
-  if (configInputs.reportChangedScopeOnly) {
-    const filesDiffs = await getFilesDiffs()
-    const filteredMessages = rawReport.messages.filter(
-      message =>
-        !message.sourceFilePath ||
-        isSourceInChangedScope(
-          filesDiffs,
-          message.sourceFilePath,
-          message.sourceFileLine
-        )
-    )
+const filterReport = (
+  rawReport: DocsReport,
+  changedFiles: FilesDiffsMap
+): DocsReport => {
+  const filteredMessages = rawReport.messages.filter(
+    message =>
+      !message.sourceFilePath ||
+      isSourceInChangedScope(
+        changedFiles,
+        message.sourceFilePath,
+        message.sourceFileLine
+      )
+  )
 
-    // recompute errors and warnings count
-    let errorsCount = 0
-    let warningsCount = 0
-    for (const message of filteredMessages) {
-      if (message.level === 'error') {
-        errorsCount++
-      } else if (message.level === 'warning') {
-        warningsCount++
-      }
-    }
-
-    return {
-      ...rawReport,
-      errorsCount,
-      warningsCount,
-      messages: filteredMessages
-    }
-  } else {
-    return rawReport
-  }
-}
-
-const processReport = async (report: DocsReport): Promise<void> => {
-  console.info(`Report: ${JSON.stringify(report, undefined, 2)}`)
-  annotateCode(report.messages)
-  await commentReportSummary(report)
-}
-
-const setReportResults = (report: DocsReport): void => {
-  if (report.errorsCount > 0) {
-    const errorMessage = `Docs report ${report.reporter} failed with ${report.errorsCount} errors.`
-    console.error(errorMessage)
-    if (configInputs.failOnError) {
-      throw new Error(errorMessage)
+  // recompute errors and warnings count
+  let errorsCount = 0
+  let warningsCount = 0
+  for (const message of filteredMessages) {
+    if (message.level === 'error') {
+      errorsCount++
+    } else if (message.level === 'warning') {
+      warningsCount++
     }
   }
 
-  if (report.warningsCount > 0) {
-    const warningMessage = `Docs report ${report.reporter} completed with ${report.warningsCount} warnings.`
-    warning(warningMessage)
-    if (configInputs.failOnWarnings) {
-      throw new Error(warningMessage)
-    }
+  return {
+    ...rawReport,
+    errorsCount,
+    warningsCount,
+    messages: filteredMessages
   }
-
-  // Set outputs for other workflow steps to use
-  setOutput('report', JSON.stringify(report))
 }

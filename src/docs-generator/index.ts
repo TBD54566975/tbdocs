@@ -1,7 +1,6 @@
-import { configInputs } from '../config'
-import { openPr } from './open-pr'
-
 import { generateTypedocMarkdown } from './typedoc-markdown'
+
+import { EntryPoint } from '../interfaces'
 
 export * from './interfaces'
 
@@ -10,16 +9,11 @@ export * from './interfaces'
  *
  * @beta
  **/
-export const generateDocs = async (): Promise<void> => {
-  switch (configInputs.docsGenerator) {
+export const generateDocs = async (entryPoint: EntryPoint): Promise<string> => {
+  switch (entryPoint.docsGenerator) {
     case 'typedoc-markdown':
-      await generateTypedocMarkdown()
-      break
+      return generateTypedocMarkdown(entryPoint)
     default:
-      throw new Error(`Unknown docs generator: ${configInputs.docsGenerator}`)
-  }
-
-  if (configInputs.docsTargetOwnerRepo) {
-    await openPr()
+      throw new Error(`Unknown docs generator: ${entryPoint.docsGenerator}`)
   }
 }

@@ -3,18 +3,38 @@ description: 'Provide a description here'
 author: 'TBD54566975'
 
 inputs:
+  entry_points:
+    description: 'List of each project you want to run tbdocs against (YAML format)'
+    required: false
+    default: |
+      - file: src/index.ts
+        docsReporter: api-extractor
+        docsGenerator: typedoc-markdown
+
+  # entry point yaml fields:
+  # file: path to the entry point file
+  # docsReporter: name of the docs reporter tool
+  # docsGenerator: name of the docs generator tool
+  # targetRepoPath: path to push the generated docs in the target repo (see docs_target_owner_repo below)
+
   token:
     description: 'Token used to submit comments summary and open PRs'
     required: false
-  project_path:
-    description: 'Path to the project root'
+  
+  # to allow opening PRs across different repos we need an authorized bot app
+  # you could also use a user PAT in the above token field, but the generated 
+  # comments/PRs will be sent from the user
+  bot_app_id:
+    description: 'Bot app id'
     required: false
-    default: '.'
+  bot_app_private_key:
+    description: 'Bot app private key (pem format)'
+    required: false
+  bot_app_installation_id:
+    description: 'Bot app installation id'
+    required: false
 
   # reporter params
-  docs_reporter:
-    description: 'Name of the docs reporter tool (skips report if empty)'
-    required: false
   report_changed_scope_only:
     description: 'Should it report only changed scope?'
     required: false
@@ -27,17 +47,8 @@ inputs:
     description: 'Should it fail on report warnings?'
     required: false
     default: 'false'
-  api_extractor_json_path:
-    description: 'Path to the api-extractor.json file (if you need customization)'
-    required: false
-    default: ''
 
-  # generator params
-  docs_generator:
-    description: 'Name of the docs generator tool (skips docs generation if empty)'
-    required: false
-
-  # if you want to open a PR with the generated docs
+  # generated docs params, if you want to open a PR to a different repo with the generated docs
   docs_target_owner_repo:
     description: 'Target owner/repo for the generated docs PR (skips opening a PR if empty)'
     required: false
@@ -49,24 +60,11 @@ inputs:
     description: 'Target base branch for the generated docs PR'
     required: false
     default: 'main'
-  docs_target_repo_path:
-    description: 'Target repo directory to insert the generated docs'
-    required: false
-    default: 'docs'
 
-  # to allow opening PRs across different repos we need an authorized bot app
-  # you could also use a user PAT in the above token field, but the generated 
-  # comments/PRs will be owned by the user
-  bot_app_id:
-    description: 'Bot app id'
+  # generator params
+  docs_generator:
+    description: 'Name of the docs generator tool (skips docs generation if empty)'
     required: false
-  bot_app_private_key:
-    description: 'Bot app private key (pem format)'
-    required: false
-  bot_app_installation_id:
-    description: 'Bot app installation id'
-    required: false
-
 outputs:
   report:
     description: 'Generated docs report JSON object'
