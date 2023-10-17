@@ -44,7 +44,7 @@ export const getFilesDiffs = async (): Promise<FilesDiffsMap> => {
   const filesDiffsMap: FilesDiffsMap = {}
 
   for (const file of diffSummary.files) {
-    const fileDiffs = await git.diff(['-U0', targetShaOrRef, file.file])
+    const fileDiffs = await getFileDiffs(targetShaOrRef, file.file)
 
     const changedLines: GitDiffs[] = fileDiffs
       .split('\n')
@@ -73,6 +73,23 @@ export const getFilesDiffs = async (): Promise<FilesDiffsMap> => {
     filesDiffsMap
   )
   return filesDiffsMap
+}
+
+const getFileDiffs = async (
+  targetShaOrRef: string,
+  filePath: string
+): Promise<string> => {
+  try {
+    const diffs = await git.diff(['-U0', targetShaOrRef, filePath])
+    return diffs
+  } catch (error) {
+    if ((error as Error).message?.includes('path not in the working tree')) {
+      // file was removed, no diffs to be parsed
+      return ''
+    } else {
+      throw error
+    }
+  }
 }
 
 export const isSourceInChangedScope = (
