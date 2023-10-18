@@ -10,7 +10,7 @@ import { handleGithubDocsReport, handleGithubGeneratedDocs } from './github'
 /**
  * The main function for the action.
  * @returns `Promise<void>` resolves when the action is complete.
- * @public
+ * //@public
  */
 export async function run(): Promise<void> {
   try {
