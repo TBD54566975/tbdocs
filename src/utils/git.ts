@@ -31,20 +31,18 @@ export type FilesDiffsMap = Record<string, GitDiffs[]>
 const git = simpleGit()
 
 export const getFilesDiffs = async (): Promise<FilesDiffsMap> => {
-  const targetBase = getBaseInfo() || { ref: 'main', sha: undefined }
+  const targetBase = getBaseInfo() || { ref: 'main' }
 
   // Since GH Actions checkout action doesn't fetch all the history, we need to do it manually
-  await fetchGitHistory(targetBase.ref)
+  const targetSha = await fetchGitHistory(targetBase.ref)
   console.info(`Git history fetched ref '${targetBase.ref}' successfully!`)
 
-  const targetShaOrRef = targetBase.sha || targetBase.ref
-
-  const diffSummary = await git.diffSummary(['-U0', targetShaOrRef])
+  const diffSummary = await git.diffSummary(['-U0', targetSha])
 
   const filesDiffsMap: FilesDiffsMap = {}
 
   for (const file of diffSummary.files) {
-    const fileDiffs = await getFileDiffs(targetShaOrRef, file.file)
+    const fileDiffs = await getFileDiffs(targetSha, file.file)
 
     const changedLines: GitDiffs[] = fileDiffs
       .split('\n')
@@ -68,10 +66,7 @@ export const getFilesDiffs = async (): Promise<FilesDiffsMap> => {
     filesDiffsMap[fullFilePath] = changedLines
   }
 
-  console.info(
-    `>>> Files diffs map comparing with ${targetShaOrRef}`,
-    filesDiffsMap
-  )
+  console.info(`>>> Files diffs map comparing with ${targetSha}`, filesDiffsMap)
   return filesDiffsMap
 }
 
@@ -116,7 +111,7 @@ export const isSourceInChangedScope = (
   )
 }
 
-const fetchGitHistory = async (targetBranch: string): Promise<void> => {
+const fetchGitHistory = async (targetBranch: string): Promise<string> => {
   // needed for the docker container to work
   console.info(">>> Setting git config 'safe.directory' to '/github/workspace'")
 
@@ -137,4 +132,9 @@ const fetchGitHistory = async (targetBranch: string): Promise<void> => {
     'origin',
     `+refs/heads/${targetBranch}:refs/remotes/origin/${targetBranch}`
   ])
+
+  const sha = await git.revparse([`origin/${targetBranch}`])
+  console.info(`>>> Origin fetched sha: ${sha}`)
+
+  return sha
 }
