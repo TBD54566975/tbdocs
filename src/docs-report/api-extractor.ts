@@ -65,7 +65,10 @@ const processApiExtractorMessage = (
   report: DocsReport,
   message: ExtractorMessage
 ): void => {
-  if (message.category === ExtractorMessageCategory.Console) {
+  if (
+    message.category === ExtractorMessageCategory.Console ||
+    message.category === ExtractorMessageCategory.Compiler
+  ) {
     return
   }
 
