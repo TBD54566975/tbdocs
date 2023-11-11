@@ -73,7 +73,7 @@
     "@microsoft/api-extractor": "^7.38.3",
     "@octokit/auth-app": "^6.0.1",
     "@octokit/rest": "^20.0.2",
-    "@octokit/webhooks-definitions": "^3.67.3",
+    "@octokit/webhooks-definitions": "^3.68.1",
     "fs": "^0.0.1-security",
     "simple-git": "^3.20.0",
     "ts-is-present": "^1.2.2",
