@@ -80,7 +80,7 @@
     "tsconfck": "^2.1.2",
     "typedoc": "^0.25.2",
     "typedoc-plugin-markdown": "^3.16.0",
-    "yaml": "^2.3.2"
+    "yaml": "^2.3.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.5",
