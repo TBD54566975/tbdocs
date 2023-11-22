@@ -40,32 +40,10 @@ jobs:
         id: npm-build
         run: npm run bundle
 
-      - name: Test
-        id: npm-ci-test
-        run: npm run ci-test
-
       - name: Build Example
         id: example-npm-build
         run: cd examples/foo && npm ci && npm run build && cd ../..
 
-      - name: TBDocs Reporter
-        id: tbdocs-reporter
-        uses: ./
-        with:
-          fail_on_error: true
-          fail_on_warnings: true
-          report_changed_scope_only: false
-          token: ${{ secrets.GITHUB_TOKEN }}
-          entry_points: |
-            - file: src/index.ts
-              docsReporter: api-extractor
-              docsGenerator: typedoc-markdown
-            - file: examples/foo/index.ts
-              docsReporter: api-extractor
-              docsGenerator: typedoc-markdown
-
-      - name: Save Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: tbdocs-reporter-output
-          path: ./.tbdocs
+      - name: Test
+        id: npm-ci-test
+        run: npm run ci-test
