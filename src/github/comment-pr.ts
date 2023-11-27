@@ -5,15 +5,11 @@ import { getGithubContext, getOctokit } from '../utils'
 
 const BOT_NAME = 'github-actions[bot]' // TODO: handle botAppId
 
-export const commentPr = async (
-  commentBody: string,
-  commentPrefix: string
-): Promise<void> => {
+export const commentPr = async (commentBody: string): Promise<void> => {
   if (!configInputs.token && !configInputs.botAppId) {
-    console.info(
+    throw new Error(
       '>>> Skipping pushing comment. Missing credentials (token or botAppId)...'
     )
-    return
   }
 
   const octokit = getOctokit()
@@ -33,8 +29,7 @@ export const commentPr = async (
       owner,
       repo,
       issueNumber,
-      commentBody,
-      commentPrefix
+      commentBody
     )
 
     if (comment) {
@@ -50,8 +45,7 @@ const createOrUpdateComment = async (
   owner: string,
   repo: string,
   issueNumber: number,
-  commentBody: string,
-  commentPrefix: string
+  commentBody: string
 ): Promise<{ data: { url: string } } | undefined> => {
   // check if the comment exist
   const comments = await octokit.rest.issues.listComments({
@@ -59,6 +53,9 @@ const createOrUpdateComment = async (
     repo,
     issue_number: issueNumber
   })
+
+  // We assume the first line of the report has a title and will be the prefix
+  const commentPrefix = commentBody.split('\n')[0]
 
   const existingComment = comments.data.find(
     comment =>

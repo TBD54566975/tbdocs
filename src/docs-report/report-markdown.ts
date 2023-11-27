@@ -4,28 +4,25 @@ import { EntryPoint } from '../interfaces'
 import { DocsReport, ReportMessage } from '../docs-report'
 import { getGithubContext } from '../utils'
 
-import { commentPr } from './comment-pr'
-import { annotateCode } from './annotate-code'
-
-const REPORT_HEADER_PREFIX = `**TBDocs Report**`
 const MISC_MESSAGES_GROUP = '_misc_group'
+export const REPORT_HEADER_PREFIX = `**TBDocs Report**`
 
-export const submitReportsSummaryComment = async (
+export const generateReportMarkdown = async (
   entryPoints: EntryPoint[]
-): Promise<void> => {
+): Promise<string> => {
   const totalCounts = { errors: 0, warnings: 0 }
 
-  const projectsComments = entryPoints
+  const projectsReports = entryPoints
     .filter(hasPresentKey('report'))
     .map(ep => processReport(ep.projectName, ep.report, ep.file, totalCounts))
 
-  const finalCommentBody = getTotalReportsSummaryCommentBody(
-    projectsComments,
+  const reportMarkdown = summarizeAllReports(
+    projectsReports,
     totalCounts.errors,
     totalCounts.warnings
   )
 
-  await commentPr(finalCommentBody, REPORT_HEADER_PREFIX)
+  return reportMarkdown
 }
 
 /** Annotate report files and generate the comment summary */
@@ -36,7 +33,6 @@ const processReport = (
   totalReportsAccumulator: { errors: number; warnings: number }
 ): string => {
   console.info(`${projectName} Report: ${JSON.stringify(report, undefined, 2)}`)
-  annotateCode(report.messages)
   totalReportsAccumulator.errors += report.errorsCount
   totalReportsAccumulator.warnings += report.warningsCount
   return getCommentReportSummary(report, projectName, file)
@@ -54,7 +50,7 @@ export const getCommentReportSummary = (
   return commentBody
 }
 
-export const getTotalReportsSummaryCommentBody = (
+export const summarizeAllReports = (
   reportsComments: string[],
   errorsCount: number,
   warningsCount: number
@@ -68,10 +64,11 @@ export const getTotalReportsSummaryCommentBody = (
 
   const filesTables = reportsComments.join('\n\n')
 
-  const { shortSha, commitUrl } = getGithubContext()
-  const updateFooterText = `_Updated @ ${new Date().toISOString()} - Commit: [\`${shortSha}\`](${commitUrl})_`
+  // const { shortSha, commitUrl } = getGithubContext()
+  // const updateFooterText = `_Updated @ ${new Date().toISOString()} - Commit: [\`${shortSha}\`](${commitUrl})_`
 
-  return `${headerText}\n\n${subHeaderText}\n\n${filesTables}\n\n---\n${updateFooterText}`
+  return `${headerText}\n\n${subHeaderText}\n\n${filesTables}`
+  // \n\n---\n${updateFooterText}
 }
 
 const generateFilesTable = (report: DocsReport): string => {

@@ -1,9 +1,9 @@
 import { setOutput, warning } from '@actions/core'
 
 import { EntryPoint } from '../interfaces'
-import { submitReportsSummaryComment } from './comment-report'
 import { DocsReport } from '../docs-report'
 import { pushDocsPr } from './docs-pr'
+import { annotateCode } from './annotate-code'
 
 export const handleGithubGeneratedDocs = async (
   entryPoints: EntryPoint[]
@@ -16,7 +16,14 @@ export const handleGithubDocsReport = async (
   failOnError: boolean,
   failOnWarnings: boolean
 ): Promise<void> => {
-  await submitReportsSummaryComment(entryPoints)
+  // annotate code in github
+  for (const { report } of entryPoints) {
+    if (report) {
+      annotateCode(report.messages)
+    }
+  }
+
+  // handle reports summary logs
   getReportResults(entryPoints, failOnError, failOnWarnings)
 }
 

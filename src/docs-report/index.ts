@@ -3,6 +3,7 @@ import { EntryPoint } from '../interfaces'
 import { generateApiExtractorReport } from './api-extractor'
 import { DocsReport } from './interfaces'
 
+export * from './report-markdown'
 export * from './interfaces'
 
 /**
