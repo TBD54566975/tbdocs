@@ -24,11 +24,11 @@ export const handleGithubDocsReport = async (
     }
   }
 
-  // handle reports summary logs
-  getReportResults(entryPoints, failOnError, failOnWarnings)
-
   // generate job summary markdown
   await summary.addRaw(reportMarkdown).write()
+
+  // handle reports summary errors and warnings logs
+  getReportResults(entryPoints, failOnError, failOnWarnings)
 }
 
 const getReportResults = (

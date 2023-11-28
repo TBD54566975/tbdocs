@@ -53,7 +53,7 @@ jobs:
         uses: ./
         with:
           fail_on_error: true
-          fail_on_warnings: false
+          fail_on_warnings: true
           report_changed_scope_only: false
           token: ${{ secrets.GITHUB_TOKEN }}
           entry_points: |
