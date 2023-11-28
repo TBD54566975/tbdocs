@@ -57,7 +57,12 @@ export async function run(): Promise<void> {
     const reportMarkdown = await generateReportMarkdown(entryPoints)
     writeFileSync('.tbdocs/docs-report.md', reportMarkdown)
 
-    await handleGithubDocsReport(entryPoints, failOnError, failOnWarnings)
+    await handleGithubDocsReport(
+      entryPoints,
+      reportMarkdown,
+      failOnError,
+      failOnWarnings
+    )
 
     if (docsTargetOwnerRepo) {
       await handleGithubGeneratedDocs(entryPoints)

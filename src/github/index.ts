@@ -1,4 +1,4 @@
-import { setOutput, warning } from '@actions/core'
+import { setOutput, warning, summary } from '@actions/core'
 
 import { EntryPoint } from '../interfaces'
 import { DocsReport } from '../docs-report'
@@ -13,6 +13,7 @@ export const handleGithubGeneratedDocs = async (
 
 export const handleGithubDocsReport = async (
   entryPoints: EntryPoint[],
+  reportMarkdown: string,
   failOnError: boolean,
   failOnWarnings: boolean
 ): Promise<void> => {
@@ -25,6 +26,9 @@ export const handleGithubDocsReport = async (
 
   // handle reports summary logs
   getReportResults(entryPoints, failOnError, failOnWarnings)
+
+  // generate job summary markdown
+  await summary.addRaw(reportMarkdown).write()
 }
 
 const getReportResults = (
