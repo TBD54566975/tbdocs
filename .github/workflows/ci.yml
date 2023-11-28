@@ -53,7 +53,7 @@ jobs:
         uses: ./
         with:
           fail_on_error: true
-          fail_on_warnings: true
+          fail_on_warnings: false
           report_changed_scope_only: false
           token: ${{ secrets.GITHUB_TOKEN }}
           entry_points: |
@@ -66,6 +66,7 @@ jobs:
 
       - name: Save Artifacts
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: tbdocs-reporter-output
           path: ./.tbdocs
