@@ -5,8 +5,12 @@ import { DocsReport, ReportMessage } from '../docs-report'
 import { getGithubContext } from '../utils'
 
 const MISC_MESSAGES_GROUP = '_misc_group'
-export const REPORT_HEADER_PREFIX = `**TBDocs Report**`
+const REPORT_HEADER_PREFIX = `**TBDocs Report**`
 
+/**
+ * Formats the docs reporter results into a markdown summary
+ * @public
+ */
 export const generateReportMarkdown = async (
   entryPoints: EntryPoint[]
 ): Promise<string> => {
@@ -38,7 +42,7 @@ const processReport = (
   return getCommentReportSummary(report, projectName, file)
 }
 
-export const getCommentReportSummary = (
+const getCommentReportSummary = (
   report: DocsReport,
   projectName: string,
   entryPointFile: string
@@ -50,7 +54,7 @@ export const getCommentReportSummary = (
   return commentBody
 }
 
-export const summarizeAllReports = (
+const summarizeAllReports = (
   reportsComments: string[],
   errorsCount: number,
   warningsCount: number
