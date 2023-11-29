@@ -1,0 +1,51 @@
+name: TBDocs Commenter
+
+on:
+  workflow_run:
+    workflows: ['Continuous Integration']
+    types:
+      - completed
+
+jobs:
+  comment-action:
+    name: TBDocs PR Comment
+    runs-on: ubuntu-latest
+    # runs only if it's triggered from a PR
+    if: github.event.workflow_run.pull_requests[0].number != null
+
+    steps:
+      - name: Download TBDocs Report
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          run_id: ${{ github.event.workflow_run.id }}
+          name: tbdocs-reporter-output
+          path: ./.tbdocs
+
+      - name: Report Aux Vars
+        id: report
+        run: |
+          content=$(cat .tbdocs/docs-report.md)
+          echo "::set-output name=content::$content"
+
+          timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "::set-output name=updated-at::$timestamp"
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: TBDocs Report
+
+      # Comment content of the report.md file on the PR
+      - name: Comment on PR
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          # body with the content of the downloaded artifact report.md file
+          body: |
+            ${{ steps.report.outputs.content }}
+            ---
+            TBDocs Report Updated at ${{ steps.report.outputs.timestamp }} - [${{ github.event.workflow_run.pull_requests[0].head_sha }}](https://github.com/${{ github.repository }}/commit/${{ github.event.workflow_run.pull_requests[0].head_sha }})

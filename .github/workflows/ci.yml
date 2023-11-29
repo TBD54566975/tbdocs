@@ -66,6 +66,7 @@ jobs:
 
       - name: Save Artifacts
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: tbdocs-reporter-output
           path: ./.tbdocs
