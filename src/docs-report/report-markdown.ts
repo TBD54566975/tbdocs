@@ -9,6 +9,7 @@ const REPORT_HEADER_PREFIX = `**TBDocs Report**`
 
 /**
  * Formats the docs reporter results into a markdown summary
+ * @public
  */
 export const generateReportMarkdown = async (
   entryPoints: EntryPoint[]
