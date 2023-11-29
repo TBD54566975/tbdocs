@@ -25,10 +25,15 @@ jobs:
         id: report
         run: |
           content=$(cat .tbdocs/docs-report.md)
-          echo "::set-output name=content::$content"
+          echo 'content<<EOF' >> $GITHUB_OUTPUT
+          echo $content >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+          head_sha=${{ github.event.workflow_run.pull_requests[0].head.sha }}
+          echo "head_sha=${head_sha:0:7}" >> $GITHUB_OUTPUT
 
           timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          echo "::set-output name=updated-at::$timestamp"
+          echo "timestamp=$timestamp" >> $GITHUB_OUTPUT
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
@@ -48,4 +53,4 @@ jobs:
           body: |
             ${{ steps.report.outputs.content }}
             ---
-            TBDocs Report Updated at ${{ steps.report.outputs.timestamp }} - [${{ github.event.workflow_run.pull_requests[0].head_sha }}](https://github.com/${{ github.repository }}/commit/${{ github.event.workflow_run.pull_requests[0].head_sha }})
+            TBDocs Report Updated at ${{ steps.report.outputs.timestamp }} - [${{ steps.report.outputs.head_sha }}](https://github.com/${{ github.repository }}/commit/${{ github.event.workflow_run.pull_requests[0].head.sha }})
