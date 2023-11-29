@@ -32,7 +32,8 @@ jobs:
           
           footer_line="_TBDocs Report Updated at $timestamp [\`$short_sha\`]($sha_link)_"
 
-          echo "---\n$footer_line" >> $report_file
+          echo "---" >> $report_file
+          echo $footer_line >> $report_file
 
       - name: Find Comment
         uses: peter-evans/find-comment@v2
