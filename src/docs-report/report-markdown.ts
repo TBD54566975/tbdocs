@@ -1,14 +1,15 @@
 import { hasPresentKey } from 'ts-is-present'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
 
 import { EntryPoint } from '../interfaces'
 import { DocsReport, ReportMessage } from '../docs-report'
 import { getGithubContext } from '../utils'
 
 const MISC_MESSAGES_GROUP = '_misc_group'
-const REPORT_HEADER_PREFIX = `**TBDocs Report**`
 
 /**
- * Formats the docs reporter results into a markdown summary
+ * Formats the docs reporter results into a markdown summary and writes it to the
+ * .tbdocs/docs-report.md file.
  * @public
  */
 export const generateReportMarkdown = async (
@@ -25,6 +26,8 @@ export const generateReportMarkdown = async (
     totalCounts.errors,
     totalCounts.warnings
   )
+
+  saveReportFile(reportMarkdown)
 
   return reportMarkdown
 }
@@ -59,7 +62,7 @@ const summarizeAllReports = (
   errorsCount: number,
   warningsCount: number
 ): string => {
-  const headerText = `${REPORT_HEADER_PREFIX}`
+  const headerText = '**TBDocs Report**'
 
   const reportHasIssues = errorsCount > 0 || warningsCount > 0
   const subHeaderText = reportHasIssues
@@ -127,4 +130,16 @@ const getMessageLog = (
       : ''
 
   return `| ${flag} \`${message.category}:${message.messageId}\`: ${message.text} ${link} |`
+}
+
+const saveReportFile = (reportMarkdown: string): void => {
+  const docsReportPath = '.tbdocs'
+  const docsReportFileName = 'docs-report.md'
+  const docsReportFilePath = `${docsReportPath}/${docsReportFileName}`
+
+  if (!existsSync(docsReportPath)) {
+    mkdirSync(docsReportPath)
+  }
+
+  writeFileSync(docsReportFilePath, reportMarkdown)
 }
