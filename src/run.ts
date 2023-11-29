@@ -2,7 +2,6 @@ import * as core from '@actions/core'
 
 import { configInputs, getInputEntryPoints } from './config'
 import { runDocsReport, generateReportMarkdown } from './docs-report'
-import { writeFileSync } from 'fs'
 import { generateDocs } from './docs-generator'
 
 import { getFilesDiffs } from './utils'
@@ -55,7 +54,6 @@ export async function run(): Promise<void> {
     }
 
     const reportMarkdown = await generateReportMarkdown(entryPoints)
-    writeFileSync('.tbdocs/docs-report.md', reportMarkdown)
 
     await handleGithubDocsReport(
       entryPoints,
