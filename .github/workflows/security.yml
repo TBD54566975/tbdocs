@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+  # Run every day at 5am UTC
+  schedule:
+    - cron: '0 5 * * *'
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -31,13 +35,13 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: 'Run FOSSA Scan'
-        uses: fossas/fossa-action@main # Use a specific version if locking is preferred
+      - name: Run FOSSA Scan
+        uses: fossas/fossa-action@main
         with:
           api-key: ${{ secrets.FOSSA_API_KEY }}
 
-      - name: 'Run FOSSA Test'
-        uses: fossas/fossa-action@main # Use a specific version if locking is preferred
+      - name: Run FOSSA Test
+        uses: fossas/fossa-action@main
         with:
           api-key: ${{ secrets.FOSSA_API_KEY }}
           run-tests: true
