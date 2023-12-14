@@ -1,6 +1,6 @@
 import path from 'path'
 import { readFileSync, writeFileSync } from 'fs'
-import { Application } from 'typedoc'
+import { Application, TypeDocOptions } from 'typedoc'
 
 import { EntryPoint } from '../interfaces'
 import { loadTsconfigProps, lookupFile } from '../utils'
@@ -17,8 +17,9 @@ declare module 'typedoc' {
 
 const ENTRY_DOCUMENT = 'index.md'
 
-export const generateTypedocMarkdown = async (
-  entryPoint: EntryPoint
+export const generateTypedoc = async (
+  entryPoint: EntryPoint,
+  isMarkdown?: boolean
 ): Promise<string> => {
   console.info('>>> Generating docs...')
 
@@ -33,20 +34,33 @@ export const generateTypedocMarkdown = async (
 
   const { tsconfigFile } = await loadTsconfigProps(entryPoint.projectPath)
 
-  console.info('>>> Typedoc Generator entryPoint', entryPointFile)
-  const generatorApp = await Application.bootstrapWithPlugins({
+  let generatorConfig: Partial<TypeDocOptions> = {
     tsconfig: tsconfigFile,
     entryPoints: [entryPointFile],
     skipErrorChecking: true,
-    plugin: ['typedoc-plugin-markdown'],
-    readme: 'none',
-    entryDocument: ENTRY_DOCUMENT,
     disableSources: true,
-    hidePageTitle: true,
-    hideBreadcrumbs: true,
-    hideInPageTOC: true,
-    githubPages: false
-  })
+    readme: 'none',
+    includeVersion: true
+  }
+
+  if (isMarkdown) {
+    generatorConfig = {
+      ...generatorConfig,
+      plugin: ['typedoc-plugin-markdown'],
+      entryDocument: ENTRY_DOCUMENT,
+      hidePageTitle: true,
+      hideBreadcrumbs: true,
+      hideInPageTOC: true,
+      githubPages: false
+    }
+  }
+
+  console.info(
+    '>>> Typedoc Generator entryPoint',
+    entryPointFile,
+    generatorConfig
+  )
+  const generatorApp = await Application.bootstrapWithPlugins(generatorConfig)
 
   const projectReflection = await generatorApp.convert()
   if (!projectReflection) {
@@ -62,7 +76,9 @@ export const generateTypedocMarkdown = async (
     entryPoint.projectName = projectReflection.packageName
   }
 
-  addTitleToIndexFile(projectReflection.packageName, outputDir)
+  if (isMarkdown) {
+    addTitleToIndexFile(projectReflection.packageName, outputDir)
+  }
 
   return outputDir
 }

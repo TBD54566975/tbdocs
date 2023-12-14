@@ -1,4 +1,4 @@
-import { generateTypedocMarkdown } from './typedoc-markdown'
+import { generateTypedoc } from './typedoc-markdown'
 
 import { EntryPoint } from '../interfaces'
 
@@ -12,7 +12,9 @@ export * from './interfaces'
 export const generateDocs = async (entryPoint: EntryPoint): Promise<string> => {
   switch (entryPoint.docsGenerator) {
     case 'typedoc-markdown':
-      return generateTypedocMarkdown(entryPoint)
+      return generateTypedoc(entryPoint, true)
+    case 'typedoc-html':
+      return generateTypedoc(entryPoint, false)
     default:
       throw new Error(`Unknown docs generator: ${entryPoint.docsGenerator}`)
   }
