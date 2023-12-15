@@ -20,9 +20,9 @@ inputs:
   token:
     description: 'Token used to submit comments summary and open PRs'
     required: false
-  
+
   # to allow opening PRs across different repos we need an authorized bot app
-  # you could also use a user PAT in the above token field, but the generated 
+  # you could also use a user PAT in the above token field, but the generated
   # comments/PRs will be sent from the user
   bot_app_id:
     description: 'Bot app id'
@@ -48,7 +48,13 @@ inputs:
     required: false
     default: 'false'
 
-  # generated docs params, if you want to open a PR to a different repo with the generated docs
+  # generated docs params
+  docs_grouped:
+    description: 'Should it group the generated docs by entry point?'
+    required: false
+    default: 'false'
+
+  # if you want to open a PR to a different repo with the generated docs
   docs_target_owner_repo:
     description: 'Target owner/repo for the generated docs PR (skips opening a PR if empty)'
     required: false

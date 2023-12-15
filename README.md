@@ -164,13 +164,14 @@ node scripts/main.js
 
 # if you want to test multiple packages processing
 cd examples/foo && npm i && npm run build && cd ../..
+export INPUT_DOCS_GROUPED="true"
 export INPUT_ENTRY_POINTS="
 - file: src/index.ts
   docsReporter: api-extractor
-  docsGenerator: typedoc-markdown
+  docsGenerator: typedoc-html
 - file: examples/foo/index.ts
   docsReporter: api-extractor
-  docsGenerator: typedoc-markdown
+  docsGenerator: typedoc-html
 "
 node scripts/main.js
 ```

@@ -18,7 +18,8 @@ export async function run(): Promise<void> {
       reportChangedScopeOnly,
       docsTargetOwnerRepo,
       failOnError,
-      failOnWarnings
+      failOnWarnings,
+      docsGrouped
     } = configInputs
 
     const entryPoints = getInputEntryPoints()
@@ -28,6 +29,8 @@ export async function run(): Promise<void> {
       ? await getFilesDiffs()
       : undefined
 
+    const groupedGeneratedDocsEntryPoints = []
+
     for (const entryPoint of entryPoints) {
       console.info(`Processing entry point ${entryPoint.file}...`)
 
@@ -36,9 +39,11 @@ export async function run(): Promise<void> {
         entryPoint.report = await runDocsReport(entryPoint, changedFiles)
       }
 
-      if (entryPoint.docsGenerator) {
+      if (entryPoint.docsGenerator && docsGrouped) {
+        groupedGeneratedDocsEntryPoints.push(entryPoint)
+      } else if (entryPoint.docsGenerator) {
         console.info(`Executing docs generator ${entryPoint.docsGenerator} ...`)
-        entryPoint.generatedDocsPath = await generateDocs(entryPoint)
+        entryPoint.generatedDocsPath = await generateDocs([entryPoint])
       }
 
       console.info(
@@ -51,6 +56,14 @@ export async function run(): Promise<void> {
           2
         )
       )
+    }
+
+    if (groupedGeneratedDocsEntryPoints.length > 0) {
+      console.info('Executing docs generator in group mode...')
+      const generatedDocsPath = await generateDocs(
+        groupedGeneratedDocsEntryPoints
+      )
+      console.info(`Generated docs at path ${generatedDocsPath}`)
     }
 
     const reportMarkdown = await generateReportMarkdown(entryPoints)

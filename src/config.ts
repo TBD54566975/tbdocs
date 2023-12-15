@@ -36,5 +36,6 @@ export const configInputs = {
 
   docsTargetOwnerRepo: getInput('docs_target_owner_repo'),
   docsTargetBranch: getInput('docs_target_branch'),
-  docsTargetPrBaseBranch: getInput('docs_target_pr_base_branch')
+  docsTargetPrBaseBranch: getInput('docs_target_pr_base_branch'),
+  docsGrouped: getInput('docs_grouped') === 'true'
 }
