@@ -34,6 +34,8 @@ export const configInputs = {
   failOnError: getInput('fail_on_error') === 'true',
   failOnWarnings: getInput('fail_on_warnings') === 'true',
 
+  groupDocs: getInput('group_docs') === 'true',
+
   docsTargetOwnerRepo: getInput('docs_target_owner_repo'),
   docsTargetBranch: getInput('docs_target_branch'),
   docsTargetPrBaseBranch: getInput('docs_target_pr_base_branch')

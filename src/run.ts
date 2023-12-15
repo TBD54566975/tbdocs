@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 
 import { configInputs, getInputEntryPoints } from './config'
 import { runDocsReport, generateReportMarkdown } from './docs-report'
-import { generateDocs } from './docs-generator'
+import { generateDocs, groupDocs } from './docs-generator'
 
 import { getFilesDiffs } from './utils'
 import { handleGithubDocsReport, handleGithubGeneratedDocs } from './github'
@@ -18,7 +18,8 @@ export async function run(): Promise<void> {
       reportChangedScopeOnly,
       docsTargetOwnerRepo,
       failOnError,
-      failOnWarnings
+      failOnWarnings,
+      groupDocs: isGroupDocs
     } = configInputs
 
     const entryPoints = getInputEntryPoints()
@@ -51,6 +52,10 @@ export async function run(): Promise<void> {
           2
         )
       )
+    }
+
+    if (isGroupDocs) {
+      await groupDocs(entryPoints)
     }
 
     const reportMarkdown = await generateReportMarkdown(entryPoints)

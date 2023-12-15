@@ -157,6 +157,8 @@ docs markdown files in the folder `.tbdocs/docs`.
 
 ```sh
 export GITHUB_REPOSITORY=test-user/test-repo
+export GITHUB_STEP_SUMMARY='../tbdocs-summary.md'
+touch ../tbdocs-summary.md
 
 node scripts/main.js
 

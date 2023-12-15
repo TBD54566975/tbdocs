@@ -11,4 +11,4 @@
  *
  * @public
  **/
-export type DocsGeneratorType = 'typedoc-markdown'
+export type DocsGeneratorType = 'typedoc-markdown' | 'typedoc-html'
