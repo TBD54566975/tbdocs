@@ -20,9 +20,9 @@ inputs:
   token:
     description: 'Token used to submit comments summary and open PRs'
     required: false
-  
+
   # to allow opening PRs across different repos we need an authorized bot app
-  # you could also use a user PAT in the above token field, but the generated 
+  # you could also use a user PAT in the above token field, but the generated
   # comments/PRs will be sent from the user
   bot_app_id:
     description: 'Bot app id'
@@ -45,6 +45,11 @@ inputs:
     default: 'true'
   fail_on_warnings:
     description: 'Should it fail on report warnings?'
+    required: false
+    default: 'false'
+
+  group_docs:
+    description: 'Should it group the generated docs files in the `.tbdocs/docs` folder?'
     required: false
     default: 'false'
 

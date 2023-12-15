@@ -67,9 +67,13 @@ export const generateTypedoc = async (
     throw new Error('Failed to generate docs')
   }
 
+  console.info('>>> Generating typedoc docs...', { isMarkdown })
   const outputDir = path.join(entryPoint.projectPath, '.tbdocs/docs')
-
   await generatorApp.generateDocs(projectReflection, outputDir)
+
+  console.info('>>> Generating typedoc json...')
+  const outputJson = path.join(outputDir, 'docs.json')
+  await generatorApp.generateJson(projectReflection, outputJson)
 
   // Set project name if not set before
   if (!entryPoint.projectName) {
