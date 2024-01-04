@@ -34,7 +34,11 @@ export async function run(): Promise<void> {
 
       if (entryPoint.docsReporter) {
         console.info(`Executing docs reporter ${entryPoint.docsReporter} ...`)
-        entryPoint.report = await runDocsReport(entryPoint, changedFiles)
+        entryPoint.report = await runDocsReport(
+          entryPoint,
+          changedFiles,
+          entryPoint.docsReporterIgnore
+        )
       }
 
       if (entryPoint.docsGenerator) {

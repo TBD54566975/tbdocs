@@ -4,7 +4,8 @@ author: 'TBD54566975'
 
 inputs:
   entry_points:
-    description: 'List of each project you want to run tbdocs against (YAML format)'
+    description:
+      'List of each project you want to run tbdocs against (YAML format)'
     required: false
     default: |
       - file: src/index.ts
@@ -14,6 +15,7 @@ inputs:
   # entry point yaml fields:
   # file: path to the entry point file
   # docsReporter: name of the docs reporter tool
+  # docsReporterIgnore: list of errors to ignore `extractor:ae-missing-release-tag`, `docs:tsdoc-param-tag-with-invalid-name`, etc.
   # docsGenerator: name of the docs generator tool
   # targetRepoPath: path to push the generated docs in the target repo (see docs_target_owner_repo below)
 
@@ -49,13 +51,15 @@ inputs:
     default: 'false'
 
   group_docs:
-    description: 'Should it group the generated docs files in the `.tbdocs/docs` folder?'
+    description:
+      'Should it group the generated docs files in the `.tbdocs/docs` folder?'
     required: false
     default: 'false'
 
   # generated docs params, if you want to open a PR to a different repo with the generated docs
   docs_target_owner_repo:
-    description: 'Target owner/repo for the generated docs PR (skips opening a PR if empty)'
+    description:
+      'Target owner/repo for the generated docs PR (skips opening a PR if empty)'
     required: false
   docs_target_branch:
     description: 'Target branch for the generated docs PR'
@@ -68,7 +72,8 @@ inputs:
 
   # generator params
   docs_generator:
-    description: 'Name of the docs generator tool (skips docs generation if empty)'
+    description:
+      'Name of the docs generator tool (skips docs generation if empty)'
     required: false
 outputs:
   report:
