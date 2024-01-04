@@ -69,7 +69,6 @@ const processApiExtractorMessage = (
   message: ExtractorMessage,
   ignoreMessages: string[] = []
 ): void => {
-  console.info('>>>MSG>>>', message)
   if (
     message.category === ExtractorMessageCategory.Console ||
     message.category === ExtractorMessageCategory.Compiler
