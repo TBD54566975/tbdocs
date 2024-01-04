@@ -80,6 +80,8 @@ const processApiExtractorMessage = (
   const category = getCategoryFromApiExtractor(message.category)
   const messageId = message.messageId
 
+  // Hack to support destructured param names
+  // TODO: Watch https://github.com/microsoft/tsdoc/issues/19
   if (
     messageId === 'tsdoc-param-tag-with-invalid-name' &&
     checkIsValidParamName(message)
