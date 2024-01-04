@@ -20,6 +20,7 @@ import {
   lookupFile
 } from '../utils'
 import { EntryPoint } from '../interfaces'
+import { readFileSync } from 'fs'
 
 export const generateApiExtractorReport = async (
   entryPoint: EntryPoint,
@@ -68,6 +69,7 @@ const processApiExtractorMessage = (
   message: ExtractorMessage,
   ignoreMessages: string[] = []
 ): void => {
+  console.info('>>>MSG>>>', message)
   if (
     message.category === ExtractorMessageCategory.Console ||
     message.category === ExtractorMessageCategory.Compiler
@@ -77,6 +79,13 @@ const processApiExtractorMessage = (
 
   const category = getCategoryFromApiExtractor(message.category)
   const messageId = message.messageId
+
+  if (
+    messageId === 'tsdoc-param-tag-with-invalid-name' &&
+    checkIsValidParamName(message)
+  ) {
+    return
+  }
 
   const fullMessageId = `${category}:${messageId}`
   if (ignoreMessages.includes(fullMessageId)) {
@@ -219,4 +228,40 @@ const getPackageRequiredFields = (
   }
 
   return { typings, main }
+}
+
+const checkIsValidParamName = (message: ExtractorMessage): boolean => {
+  const sourceLineWords = readSourceLineWords(
+    message.sourceFilePath!,
+    message.sourceFileLine!,
+    message.sourceFileColumn!
+  )
+  if (sourceLineWords.length >= 2) {
+    const paramName = sourceLineWords[1]
+    if (isValidParamNameWithDot(paramName)) {
+      console.info('Ignoring paramName with dotted notation: ', paramName)
+      return true
+    }
+  }
+  return false
+}
+
+const readSourceLineWords = (
+  filePath: string,
+  line: number,
+  column: number
+): string => {
+  const fileContent = readFileSync(filePath, 'utf8')
+  const lines = fileContent.split('\n')
+  if (line > lines.length) return ''
+
+  const targetLine = lines[line - 1] // Lines are 1-indexed, arrays are 0-indexed
+  const words = targetLine.slice(column - 1).split(/\s+/) // Columns are 1-indexed
+  console.info('>>> Words:', words)
+  return words[0]
+}
+
+const isValidParamNameWithDot = (variableName: string): boolean => {
+  const regex = /^[a-zA-Z_$][\w$]*(\.[a-zA-Z_$][\w$]*)*$/
+  return regex.test(variableName)
 }
