@@ -14,16 +14,20 @@ export * from './interfaces'
  **/
 export const runDocsReport = async (
   entryPoint: EntryPoint,
-  changedFiles?: FilesDiffsMap
+  changedFiles?: FilesDiffsMap,
+  ignoreMessages?: string[]
 ): Promise<DocsReport> => {
-  const report = await generateReport(entryPoint)
+  const report = await generateReport(entryPoint, ignoreMessages)
   return changedFiles ? filterReport(report, changedFiles) : report
 }
 
-const generateReport = async (entryPoint: EntryPoint): Promise<DocsReport> => {
+const generateReport = async (
+  entryPoint: EntryPoint,
+  ignoreMessages?: string[]
+): Promise<DocsReport> => {
   switch (entryPoint.docsReporter) {
     case 'api-extractor':
-      return generateApiExtractorReport(entryPoint)
+      return generateApiExtractorReport(entryPoint, ignoreMessages)
     default:
       throw new Error(`Unknown docs report: ${entryPoint.docsReporter}`)
   }

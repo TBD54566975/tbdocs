@@ -17,6 +17,15 @@ export interface EntryPointInputs {
   docsReporter?: DocsReporterType
 
   /**
+   * List of errors to ignore from the reporter.
+   * Example:
+   * - extractor:ae-missing-release-tag
+   * - docs:tsdoc-param-tag-with-invalid-name
+   * - etc...
+   */
+  docsReporterIgnore?: string[]
+
+  /**
    * Type of docs-generator to run, eg: typedoc-markdown;
    * If not present, no docs will be generated.
    **/

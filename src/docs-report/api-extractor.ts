@@ -22,7 +22,8 @@ import {
 import { EntryPoint } from '../interfaces'
 
 export const generateApiExtractorReport = async (
-  entryPoint: EntryPoint
+  entryPoint: EntryPoint,
+  ignoreMessages?: string[]
 ): Promise<DocsReport> => {
   const extractorConfig = await initializeExtractorConfig(entryPoint.file)
   entryPoint.projectName = extractorConfig.packageJson?.name
@@ -43,7 +44,8 @@ export const generateApiExtractorReport = async (
     localBuild: true,
     // showVerboseMessages: true,
     // showDiagnostics: true,
-    messageCallback: message => processApiExtractorMessage(report, message)
+    messageCallback: message =>
+      processApiExtractorMessage(report, message, ignoreMessages)
   })
 
   if (extractorResult.errorCount !== report.errorsCount) {
@@ -63,7 +65,8 @@ export const generateApiExtractorReport = async (
 
 const processApiExtractorMessage = (
   report: DocsReport,
-  message: ExtractorMessage
+  message: ExtractorMessage,
+  ignoreMessages: string[] = []
 ): void => {
   if (
     message.category === ExtractorMessageCategory.Console ||
@@ -72,10 +75,19 @@ const processApiExtractorMessage = (
     return
   }
 
+  const category = getCategoryFromApiExtractor(message.category)
+  const messageId = message.messageId
+
+  const fullMessageId = `${category}:${messageId}`
+  if (ignoreMessages.includes(fullMessageId)) {
+    console.info(`Ignoring message: ${fullMessageId}`)
+    return
+  }
+
   const reportMessage: ReportMessage = {
     level: message.logLevel,
-    category: getCategoryFromApiExtractor(message.category),
-    messageId: message.messageId,
+    category,
+    messageId,
     text: escapeTextForGithub(message.text),
     sourceFilePath: message.sourceFilePath,
     sourceFileLine: message.sourceFileLine,
