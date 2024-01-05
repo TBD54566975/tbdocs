@@ -39,7 +39,7 @@ export const generateTypedoc = async (
     entryPoints: [entryPointFile],
     skipErrorChecking: true,
     disableSources: true,
-    readme: 'none',
+    readme: entryPoint.readmeFile || 'none',
     includeVersion: true
   }
 
