@@ -32,6 +32,11 @@ export interface EntryPointInputs {
   docsGenerator?: DocsGeneratorType
 
   /**
+   * Path to the readme file that will be used as the index page of the docs
+   */
+  readmeFile?: string
+
+  /**
    * Path to the target repo where the docs will be pushed to.
    * If not present, the docs will be generated locally.
    */

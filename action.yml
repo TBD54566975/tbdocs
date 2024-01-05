@@ -17,6 +17,7 @@ inputs:
   # docsReporter: name of the docs reporter tool
   # docsReporterIgnore: list of errors to ignore `extractor:ae-missing-release-tag`, `docs:tsdoc-param-tag-with-invalid-name`, etc.
   # docsGenerator: name of the docs generator tool
+  # readmeFile: path to the readme file (eg README.md)
   # targetRepoPath: path to push the generated docs in the target repo (see docs_target_owner_repo below)
 
   token:
