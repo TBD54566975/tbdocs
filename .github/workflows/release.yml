@@ -1,8 +1,6 @@
 name: Publish Docs
 
 on:
-  release:
-    types: [created]
   workflow_dispatch:
     inputs:
       release_version:
@@ -48,9 +46,9 @@ jobs:
           bot_app_installation_id: ${{ secrets.BOT_APP_INSTALLATION_ID }}
           fail_on_error: true
           fail_on_warnings: true
-          docs_target_owner_repo: 'TBD54566975/developer.tbd.website'
-          docs_target_branch: 'tbdocs-bot/tbdocs'
-          docs_target_pr_base_branch: 'main'
+          # docs_target_owner_repo: 'TBD54566975/developer.tbd.website'
+          # docs_target_branch: 'tbdocs-bot/tbdocs'
+          # docs_target_pr_base_branch: 'main'
           entry_points: |
             - file: src/index.ts
               docsReporter: api-extractor
