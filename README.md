@@ -166,10 +166,10 @@ node scripts/main.js
 cd examples/foo && npm i && npm run build && cd ../..
 export INPUT_ENTRY_POINTS="
 - file: src/index.ts
-  docsReporter: api-extractor
+  docsReporter: typedoc
   docsGenerator: typedoc-markdown
 - file: examples/foo/index.ts
-  docsReporter: api-extractor
+  docsReporter: typedoc
   docsGenerator: typedoc-markdown
 "
 node scripts/main.js

@@ -28,7 +28,7 @@ export const generateTypedoc = async (
   // Set project path if not set before by the doc-reporter
   if (!entryPoint.projectPath) {
     const entryPointDir = path.dirname(entryPointFile)
-    const packageJsonPath = lookupFile(entryPointDir, 'package.json')
+    const packageJsonPath = lookupFile('package.json', entryPointDir)
     entryPoint.projectPath = packageJsonPath
   }
 
