@@ -27,9 +27,15 @@ export const generateTypedoc = async (
 
   // Set project path if not set before by the doc-reporter
   if (!entryPoint.projectPath) {
-    const entryPointDir = path.dirname(entryPointFile)
-    const packageJsonPath = lookupFile('package.json', entryPointDir)
-    entryPoint.projectPath = packageJsonPath
+    const entryPointFileFullPath = path.dirname(
+      path.join(process.cwd(), entryPointFile)
+    )
+    const packageJsonFullPath = lookupFile(
+      'package.json',
+      entryPointFileFullPath
+    )
+    const projectPath = path.dirname(packageJsonFullPath)
+    entryPoint.projectPath = projectPath
   }
 
   const { tsconfigFile } = await loadTsconfigProps(entryPoint.projectPath)
