@@ -11,7 +11,7 @@
  *
  *  @public
  **/
-export type DocsReporterType = 'api-extractor'
+export type DocsReporterType = 'api-extractor' | 'typedoc'
 
 /**
  * Object containing the result of running the docs reporter.

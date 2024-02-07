@@ -1,6 +1,7 @@
 import { FilesDiffsMap, isSourceInChangedScope } from '../utils'
 import { EntryPoint } from '../interfaces'
 import { generateApiExtractorReport } from './api-extractor'
+import { generateTypedocReport } from './typedoc'
 import { DocsReport } from './interfaces'
 
 export * from './report-markdown'
@@ -26,6 +27,8 @@ const generateReport = async (
   ignoreMessages?: string[]
 ): Promise<DocsReport> => {
   switch (entryPoint.docsReporter) {
+    case 'typedoc':
+      return generateTypedocReport(entryPoint, ignoreMessages)
     case 'api-extractor':
       return generateApiExtractorReport(entryPoint, ignoreMessages)
     default:
