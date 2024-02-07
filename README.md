@@ -182,7 +182,7 @@ that you have in your local environment without needing to setup and wait for a
 real GH action execution.
 
 ```sh
-docker build -f Dockerfile . --tag tbdocs-app:latest
+docker build -f Dockerfile . --tag tbdocs:latest
 
 # now from the repo you want to analyze & generate docs
 # below is an example of running it from the root of tbdex-js repo
