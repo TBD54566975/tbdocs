@@ -129,7 +129,13 @@ const getMessageLog = (
       ? `[#L${message.sourceFileLine}](${blobBaseUrl}/${relativePath}#L${message.sourceFileLine})`
       : ''
 
-  return `| ${flag} \`${message.category}:${message.messageId}\`: ${message.text} ${link} |`
+  const escapedText = message.text
+    // escape pipes
+    .replaceAll('|', '\\|')
+    // remove line breaks
+    .replaceAll('\n', '')
+
+  return `| ${flag} \`${message.category}:${message.messageId}\`: ${escapedText} ${link} |`
 }
 
 const saveReportFile = (reportMarkdown: string): void => {
